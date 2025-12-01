@@ -7,6 +7,15 @@ projekt stosuje [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [1.2.1] - 2025-12-01
+
+### Poprawiono
+
+- Plik LICENSE jest teraz poprawnie dołączany do instalacji (zamiast domyślnej licencji Electron)
+- Zaktualizowano konfigurację electron-builder o `extraResources` dla pliku LICENSE
+
+---
+
 ## [1.2.0] - 2025-12-01
 
 ### Dodano
