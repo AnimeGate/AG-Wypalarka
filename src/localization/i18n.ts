@@ -339,6 +339,17 @@ i18n.use(initReactI18next).init({
         burnerOutputDirectorySameAsSource: "Ten sam co źródłowy",
         burnerOutputDirectoryCustom: "Własny katalog",
         burnerOutputDirectorySelect: "Wybierz katalog",
+
+        // Idle Panel
+        idleReadyTitle: "Gotowy do startu",
+        idleSelectFilesTitle: "Wybierz pliki",
+        idleErrorTitle: "Błąd procesu",
+        idleStartButton: "Rozpocznij wypalanie",
+        idleRetryButton: "Spróbuj ponownie",
+        idleVideoFile: "Plik wideo",
+        idleSubtitleFile: "Plik napisów",
+        idleOutputLocation: "Lokalizacja",
+        idleNotSelected: "Nie wybrano",
       },
     },
     en: {
@@ -674,6 +685,17 @@ i18n.use(initReactI18next).init({
         burnerOutputDirectorySameAsSource: "Same as source",
         burnerOutputDirectoryCustom: "Custom directory",
         burnerOutputDirectorySelect: "Select directory",
+
+        // Idle Panel
+        idleReadyTitle: "Ready to start",
+        idleSelectFilesTitle: "Select files",
+        idleErrorTitle: "Process error",
+        idleStartButton: "Start burning",
+        idleRetryButton: "Try again",
+        idleVideoFile: "Video file",
+        idleSubtitleFile: "Subtitle file",
+        idleOutputLocation: "Location",
+        idleNotSelected: "Not selected",
       },
     },
   },

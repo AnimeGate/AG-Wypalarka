@@ -8,8 +8,8 @@
 import { useState, useRef } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
-import { BurnerFileInput, type BurnerFileInputHandle } from "./BurnerFileInput";
-import { BurnerProgressPanel } from "./BurnerProgressPanel";
+import { BurnerFileInput, type BurnerFileInputHandle, type FileInfo } from "./BurnerFileInput";
+import { IdlePanel } from "./IdlePanel";
 import { EncodingView } from "./progress";
 import { BurnerQueuePanel } from "./BurnerQueuePanel";
 import { BurnerQueueProgressPanel } from "./BurnerQueueProgressPanel";
@@ -116,6 +116,8 @@ function SubtitleBurnerContent() {
   const [singleFileReady, setSingleFileReady] = useState(false);
   const [currentVideoPath, setCurrentVideoPath] = useState<string | null>(null);
   const [currentOutputPath, setCurrentOutputPath] = useState<string | null>(null);
+  const [currentVideoFile, setCurrentVideoFile] = useState<FileInfo | null>(null);
+  const [currentSubtitleFile, setCurrentSubtitleFile] = useState<FileInfo | null>(null);
   const fileInputRef = useRef<BurnerFileInputHandle>(null);
 
   // Handlers
@@ -226,19 +228,21 @@ function SubtitleBurnerContent() {
                     onVideoPathChange={setCurrentVideoPath}
                     onOutputPathChange={setCurrentOutputPath}
                     onReadyChange={setSingleFileReady}
+                    onVideoFileChange={setCurrentVideoFile}
+                    onSubtitleFileChange={setCurrentSubtitleFile}
                   />
                 </div>
 
-                {/* Right Panel - Progress */}
+                {/* Right Panel - Idle/Error State */}
                 <div className="min-w-0 flex-1">
-                  <BurnerProgressPanel
-                    logs={logs}
-                    progress={progress}
+                  <IdlePanel
                     status={status}
                     errorMessage={errorMessage}
+                    videoFile={currentVideoFile}
+                    subtitleFile={currentSubtitleFile}
+                    outputPath={currentOutputPath}
                     canStart={singleFileReady && !!ffmpegInstalled}
                     onStart={handleSingleFileStart}
-                    onCancel={cancelProcess}
                   />
                 </div>
               </>

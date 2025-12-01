@@ -18,12 +18,19 @@ export interface BurnerFileInputHandle {
   startProcess: () => void;
 }
 
+export interface FileInfo {
+  name: string;
+  path: string;
+}
+
 interface BurnerFileInputProps {
   onFilesSelected: (video: string, subtitle: string, output: string) => void;
   disabled?: boolean;
   onVideoPathChange?: (path: string | null) => void;
   onOutputPathChange?: (path: string | null) => void;
   onReadyChange?: (ready: boolean) => void;
+  onVideoFileChange?: (file: FileInfo | null) => void;
+  onSubtitleFileChange?: (file: FileInfo | null) => void;
 }
 
 export const BurnerFileInput = forwardRef<
@@ -36,6 +43,8 @@ export const BurnerFileInput = forwardRef<
     onVideoPathChange,
     onOutputPathChange,
     onReadyChange,
+    onVideoFileChange,
+    onSubtitleFileChange,
   },
   ref,
 ) {
@@ -54,12 +63,18 @@ export const BurnerFileInput = forwardRef<
   // Notify parent of video path changes
   useEffect(() => {
     onVideoPathChange?.(videoFile?.path ?? null);
-  }, [videoFile, onVideoPathChange]);
+    onVideoFileChange?.(videoFile);
+  }, [videoFile, onVideoPathChange, onVideoFileChange]);
 
   // Notify parent of output path changes
   useEffect(() => {
     onOutputPathChange?.(outputPath);
   }, [outputPath, onOutputPathChange]);
+
+  // Notify parent of subtitle file changes
+  useEffect(() => {
+    onSubtitleFileChange?.(subtitleFile);
+  }, [subtitleFile, onSubtitleFileChange]);
 
   // Recompute output when output defaults change while a video is already selected
   useEffect(() => {

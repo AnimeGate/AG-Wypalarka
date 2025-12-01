@@ -8,8 +8,8 @@ export { BurnerSettingsModal } from "./BurnerSettingsModal";
 // File input
 export { BurnerFileInput, type BurnerFileInputHandle } from "./BurnerFileInput";
 
-// Progress panels
-export { BurnerProgressPanel } from "./BurnerProgressPanel";
+// Panels
+export { IdlePanel } from "./IdlePanel";
 export { BurnerQueueProgressPanel } from "./BurnerQueueProgressPanel";
 
 // Queue management
