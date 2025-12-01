@@ -116,6 +116,21 @@ interface FileAPI {
   getPathForFile: (file: File) => string;
 }
 
+interface BackgroundSettings {
+  enabled: boolean;
+  imagePath: string | null;
+  opacity: number;
+  imageData?: string | null;
+}
+
+interface BackgroundAPI {
+  get: () => Promise<BackgroundSettings>;
+  update: (partial: Partial<BackgroundSettings>) => Promise<BackgroundSettings>;
+  selectImage: () => Promise<BackgroundSettings | null>;
+  remove: () => Promise<void>;
+  onUpdated: (callback: (settings: BackgroundSettings) => void) => () => void;
+}
+
 interface ElectronAPI {
   invoke: <T = unknown>(channel: string, ...args: unknown[]) => Promise<T>;
   send: (channel: string, ...args: unknown[]) => void;
@@ -276,4 +291,5 @@ declare interface Window {
   ffmpegAPI: FfmpegAPI;
   fileAPI: FileAPI;
   electronAPI: ElectronAPI;
+  backgroundAPI: BackgroundAPI;
 }

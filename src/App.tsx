@@ -9,6 +9,7 @@ import ErrorBoundary from "./components/ErrorBoundary";
 import { Toaster } from "@/components/ui/sonner";
 import { OfflineIndicator } from "@/components/OfflineIndicator";
 import { UpdateDialog } from "@/components/UpdateDialog";
+import { BackgroundProvider } from "./helpers/background_helpers";
 import "./localization/i18n";
 
 export default function App() {
@@ -20,12 +21,12 @@ export default function App() {
   }, [i18n]);
 
   return (
-    <>
+    <BackgroundProvider>
       <RouterProvider router={router} />
       <Toaster />
       <OfflineIndicator />
       <UpdateDialog />
-    </>
+    </BackgroundProvider>
   );
 }
 

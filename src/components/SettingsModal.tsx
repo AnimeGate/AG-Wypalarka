@@ -1,4 +1,4 @@
-import { Settings, Globe, Palette, Info, Scale } from "lucide-react";
+import { Settings, Globe, Palette, Info, Scale, ImageIcon, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -19,10 +19,14 @@ import { setTheme, getCurrentTheme } from "@/helpers/theme_helpers";
 import { useState, useEffect } from "react";
 import type { ThemeMode } from "@/types/theme-mode";
 import packageJson from "../../package.json";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Slider } from "@/components/ui/slider";
+import { useBackground } from "@/helpers/background_helpers";
 
 export default function SettingsModal() {
   const { t, i18n } = useTranslation();
   const [currentTheme, setCurrentTheme] = useState<ThemeMode>("system");
+  const { background, setBackground } = useBackground();
 
   useEffect(() => {
     // Get current theme from localStorage
@@ -39,6 +43,34 @@ export default function SettingsModal() {
     const theme = value as ThemeMode;
     setCurrentTheme(theme);
     await setTheme(theme);
+  };
+
+  const handleBackgroundToggle = async (checked: boolean) => {
+    const updated = await window.backgroundAPI.update({ enabled: checked });
+    setBackground(updated);
+  };
+
+  const handleSelectBackgroundImage = async () => {
+    const result = await window.backgroundAPI.selectImage();
+    if (result) {
+      setBackground(result);
+    }
+  };
+
+  const handleRemoveBackgroundImage = async () => {
+    await window.backgroundAPI.remove();
+    setBackground({
+      enabled: false,
+      imagePath: null,
+      opacity: background.opacity,
+      imageData: null,
+    });
+  };
+
+  const handleOpacityChange = async (values: number[]) => {
+    const opacity = values[0];
+    const updated = await window.backgroundAPI.update({ opacity });
+    setBackground(updated);
   };
 
   return (
@@ -130,6 +162,76 @@ export default function SettingsModal() {
                   </Label>
                 </div>
               </RadioGroup>
+            </div>
+
+            <Separator />
+
+            {/* Background Section */}
+            <div className="space-y-3">
+              <div className="flex items-center gap-2">
+                <ImageIcon className="h-4 w-4 text-muted-foreground" />
+                <h3 className="text-sm font-semibold">{t("backgroundSection")}</h3>
+              </div>
+
+              {/* Enable/Disable Toggle */}
+              <div className="flex items-center justify-between rounded-md border p-2.5 hover:bg-accent/50 transition-colors">
+                <Label htmlFor="background-enabled" className="flex-1 cursor-pointer font-normal text-sm">
+                  {t("backgroundEnabled")}
+                </Label>
+                <Checkbox
+                  id="background-enabled"
+                  checked={background.enabled}
+                  onCheckedChange={handleBackgroundToggle}
+                  disabled={!background.imagePath}
+                />
+              </div>
+
+              {/* Image Selection */}
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="flex-1"
+                  onClick={handleSelectBackgroundImage}
+                >
+                  <ImageIcon className="h-4 w-4 mr-2" />
+                  {t("backgroundSelectImage")}
+                </Button>
+                {background.imagePath && (
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    onClick={handleRemoveBackgroundImage}
+                    title={t("backgroundRemove")}
+                  >
+                    <Trash2 className="h-4 w-4 text-destructive" />
+                  </Button>
+                )}
+              </div>
+
+              {/* No Image Hint */}
+              {!background.imagePath && (
+                <p className="text-xs text-muted-foreground">{t("backgroundNoImage")}</p>
+              )}
+
+              {/* Opacity Slider */}
+              {background.imagePath && (
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <Label className="text-sm">{t("backgroundOpacity")}</Label>
+                    <span className="text-xs text-muted-foreground">
+                      {Math.round(background.opacity * 100)}%
+                    </span>
+                  </div>
+                  <Slider
+                    value={[background.opacity]}
+                    onValueChange={handleOpacityChange}
+                    min={0}
+                    max={0.9}
+                    step={0.05}
+                  />
+                </div>
+              )}
             </div>
 
             <Separator />

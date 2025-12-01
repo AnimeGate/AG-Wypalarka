@@ -7,11 +7,33 @@ projekt stosuje [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [1.2.0] - 2025-12-01
+
+### Dodano
+
+**Tło aplikacji z efektem glassmorphism**
+- Możliwość ustawienia własnego obrazu jako tła aplikacji
+- Suwak do regulacji przyciemnienia tła (0-90%)
+- Efekt glassmorphism na kartach i panelach (rozmycie + półprzezroczystość)
+- Ustawienia dostępne w modalu Ustawienia > Tło aplikacji
+- Opcje: włącz/wyłącz, wybierz obraz, reguluj przyciemnienie, usuń tło
+- Obrazy są kopiowane do folderu aplikacji (nie wymagają oryginalnego pliku)
+- Pełna lokalizacja PL/EN
+
+### Techniczne
+- Nowy moduł IPC: `background-channels`, `background-context`, `background-listeners`
+- React Context: `BackgroundProvider` z hookiem `useBackground`
+- Rozszerzenie `SettingsStore` o `BackgroundSettings`
+- CSS z klasą `.has-custom-bg` dla stylów glassmorphism
+- Automatyczne przełączanie stylów przy aktywacji/deaktywacji tła
+
+---
+
 ## [1.1.1] - 2025-12-01
 
 ### Zmieniono
 
-- Zaktualizowano ikonę aplikacji w celu łatwiejszego rozróniania 
+- Zaktualizowano ikonę aplikacji w celu łatwiejszego rozróżniania
 
 ---
 

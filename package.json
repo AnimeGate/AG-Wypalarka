@@ -1,7 +1,7 @@
 {
   "name": "ag-wypalarka",
   "productName": "AG-Wypalarka",
-  "version": "1.1.1",
+  "version": "1.2.0",
   "description": "Professional video subtitle burning tool - embed ASS subtitles into video files with FFmpeg",
   "main": "dist-electron/main.js",
   "private": true,

@@ -57,6 +57,13 @@ i18n.use(initReactI18next).init({
         offlineDescription: "Sprawdź połączenie internetowe",
         onlineTitle: "Ponownie online",
         onlineDescription: "Połączenie internetowe przywrócone",
+        // Background
+        backgroundSection: "Tło aplikacji",
+        backgroundEnabled: "Włącz tło",
+        backgroundSelectImage: "Wybierz obraz",
+        backgroundOpacity: "Przyciemnienie",
+        backgroundRemove: "Usuń tło",
+        backgroundNoImage: "Wybierz obraz, aby ustawić tło aplikacji",
 
         // ===== BURNER TRANSLATIONS =====
         // Header
@@ -428,6 +435,13 @@ i18n.use(initReactI18next).init({
         offlineDescription: "Check your internet connection",
         onlineTitle: "Back online",
         onlineDescription: "Internet connection restored",
+        // Background
+        backgroundSection: "App Background",
+        backgroundEnabled: "Enable background",
+        backgroundSelectImage: "Select image",
+        backgroundOpacity: "Darkness",
+        backgroundRemove: "Remove background",
+        backgroundNoImage: "Select an image to set as app background",
 
         // ===== BURNER TRANSLATIONS =====
         // Header
