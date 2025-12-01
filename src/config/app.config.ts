@@ -1,7 +1,6 @@
 /**
  * Centralized Application Configuration
  *
- * Update these values to customize your app's identity.
  * This is the single source of truth for all app metadata.
  *
  * IMPORTANT: After changing these values:
@@ -14,26 +13,26 @@
  * Application Display Name
  * Used in: window titles, i18n translations, notifications
  */
-export const APP_NAME = "Electron App";
+export const APP_NAME = "AG-Wypalarka";
 
 /**
  * Application ID (reverse domain notation)
  * Used in: Windows notifications (appUserModelId)
  * Should match package.json's build.appId
  */
-export const APP_ID = "com.yourcompany.yourapp";
+export const APP_ID = "com.animegate.ag-wypalarka";
 
 /**
  * Product Name (same as APP_NAME in most cases)
  * Should match package.json's productName
  */
-export const PRODUCT_NAME = "Electron App";
+export const PRODUCT_NAME = "AG-Wypalarka";
 
 /**
  * Main Window Configuration
  */
 export const MAIN_WINDOW = {
-  title: "Electron App",
+  title: "AG-Wypalarka",
   width: 1400,
   height: 900,
 };
@@ -42,7 +41,7 @@ export const MAIN_WINDOW = {
  * Debug Console Configuration
  */
 export const DEBUG_CONSOLE = {
-  title: "Electron App - Debug Console",
+  title: "AG-Wypalarka - Debug Console",
   width: 1000,
   height: 600,
   backgroundColor: "#0d1117",
@@ -52,7 +51,7 @@ export const DEBUG_CONSOLE = {
  * HTML Page Title
  * Used in: index.html <title> tag
  */
-export const HTML_TITLE = "Electron Starter Template";
+export const HTML_TITLE = "AG-Wypalarka";
 
 /**
  * GitHub Repository Configuration
@@ -60,8 +59,8 @@ export const HTML_TITLE = "Electron Starter Template";
  * Should match package.json's build.publish section
  */
 export const GITHUB_CONFIG = {
-  owner: "yourusername",
-  repo: "your-repo",
+  owner: "AnimeGate",
+  repo: "AG-Wypalarka",
 };
 
 /**
