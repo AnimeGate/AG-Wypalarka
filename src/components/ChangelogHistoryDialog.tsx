@@ -147,7 +147,7 @@ export function ChangelogHistoryDialog() {
               <History className="h-5 w-5" />
               {t("changelogHistoryTitle")}
             </DialogTitle>
-            <div className="flex items-center gap-2">
+            <div className="mr-6 flex items-center gap-2">
               {fromCache && cacheRemainingMs > 0 && (
                 <span className="text-xs text-muted-foreground">
                   {t("changelogCached", { time: formatCacheTime(cacheRemainingMs) })}
