@@ -1,4 +1,4 @@
-import { Settings, Globe, Palette, Info } from "lucide-react";
+import { Settings, Globe, Palette, Info, Scale } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -145,6 +145,24 @@ export default function SettingsModal() {
                 <span className="text-sm font-mono text-muted-foreground">
                   v{packageJson.version}
                 </span>
+              </div>
+            </div>
+
+            <Separator />
+
+            {/* Legal Section */}
+            <div className="space-y-3">
+              <div className="flex items-center gap-2">
+                <Scale className="h-4 w-4 text-muted-foreground" />
+                <h3 className="text-sm font-semibold">{t("legalSection")}</h3>
+              </div>
+              <div className="rounded-md border p-2.5 bg-muted/30 space-y-1">
+                <div className="text-sm font-medium">
+                  © 2025 {t("copyrightHolder")}
+                </div>
+                <div className="text-xs text-muted-foreground">
+                  {t("allRightsReserved")}
+                </div>
               </div>
             </div>
           </div>
