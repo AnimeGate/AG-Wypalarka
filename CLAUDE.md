@@ -73,13 +73,22 @@ Single source of truth for all app metadata:
 ### Application Structure
 
 **Main Components (src/components/burner/):**
-- `SubtitleBurner.tsx` - Root component (uses contexts, ~340 lines)
+- `SubtitleBurner.tsx` - Root component (uses contexts, conditional rendering by state)
 - `BurnerFileInput.tsx` - Video/subtitle file selection
-- `BurnerProgressPanel.tsx` - Single file progress display
+- `IdlePanel.tsx` - Single file idle/error state with file preview
+- `progress/` - Progress display components:
+  - `ProgressRing.tsx` - Circular progress visualization
+  - `StatsBar.tsx` - Real-time encoding stats (fps, speed, bitrate, time)
+  - `CollapsibleLogs.tsx` - Expandable FFmpeg logs
+  - `EncodingView.tsx` - Combined progress view for single file mode
 - `BurnerQueuePanel.tsx` - Queue list management
-- `BurnerQueueProgressPanel.tsx` - Queue progress display
-- `BurnerSettings.tsx` - Encoding settings types
-- `BurnerSettingsModal.tsx` - Settings dialog
+- `QueueEmptyState.tsx` - Empty queue drop zone
+- `QueueIdlePanel.tsx` - Queue idle state with stats and start button
+- `QueueProcessingPanel.tsx` - Queue processing view with progress ring
+- `settings/` - Settings modal components:
+  - `SettingsModal.tsx` - Main settings dialog
+  - `QualityTab.tsx` - Quality and encoding settings
+  - `OutputTab.tsx` - Output location settings
 - `DiskSpaceBar.tsx` - Disk space footer indicator
 - `DiskSpaceDialog.tsx` - Disk space warning (single file)
 - `QueueDiskSpaceDialog.tsx` - Disk space warning (queue)

@@ -117,10 +117,17 @@ AG-Wypalarka/
 │   │   ├── burner/               # Main application components
 │   │   │   ├── SubtitleBurner.tsx        # Main component (uses contexts)
 │   │   │   ├── BurnerFileInput.tsx       # File selection
-│   │   │   ├── BurnerProgressPanel.tsx   # Single file progress
+│   │   │   ├── IdlePanel.tsx             # Single file idle/error state
+│   │   │   ├── progress/                 # Progress display components
+│   │   │   │   ├── ProgressRing.tsx      # Circular progress visualization
+│   │   │   │   ├── StatsBar.tsx          # Real-time encoding stats
+│   │   │   │   ├── CollapsibleLogs.tsx   # Expandable FFmpeg logs
+│   │   │   │   └── EncodingView.tsx      # Combined progress view
 │   │   │   ├── BurnerQueuePanel.tsx      # Queue list management
-│   │   │   ├── BurnerQueueProgressPanel.tsx  # Queue progress display
-│   │   │   ├── BurnerSettingsModal.tsx   # Encoding settings dialog
+│   │   │   ├── QueueEmptyState.tsx       # Empty queue drop zone
+│   │   │   ├── QueueIdlePanel.tsx        # Queue idle state with stats
+│   │   │   ├── QueueProcessingPanel.tsx  # Queue processing view
+│   │   │   ├── settings/                 # Settings modal components
 │   │   │   ├── DiskSpaceBar.tsx          # Disk space footer
 │   │   │   └── ...                       # Other dialogs and components
 │   │   └── ui/                   # shadcn-ui components
