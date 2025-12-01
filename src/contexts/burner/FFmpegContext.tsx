@@ -11,9 +11,28 @@ import {
   useState,
   useEffect,
   useCallback,
+  useRef,
   type ReactNode,
 } from "react";
 import { debugLog } from "@/helpers/debug-logger";
+
+/**
+ * Format file size in human-readable format.
+ */
+function formatFileSize(bytes: number): string {
+  if (bytes === 0) return "0 B";
+  const k = 1024;
+  const sizes = ["B", "KB", "MB", "GB", "TB"];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  return `${parseFloat((bytes / Math.pow(k, i)).toFixed(2))} ${sizes[i]}`;
+}
+
+/**
+ * Extract file name from path.
+ */
+function getFileName(filePath: string): string {
+  return filePath.split(/[/\\]/).pop() ?? filePath;
+}
 
 /**
  * FFmpeg encoding parameters passed to startProcess.
@@ -57,6 +76,13 @@ export interface FFmpegProgress {
   eta: string | null;
 }
 
+export interface CompletionStats {
+  encodingTime: string;
+  outputSize: string;
+  compressionRatio?: string;
+  avgFps?: number;
+}
+
 interface FFmpegContextType {
   // Installation state
   ffmpegInstalled: boolean | null;
@@ -69,6 +95,11 @@ interface FFmpegContextType {
   progress: FFmpegProgress | null;
   errorMessage: string | undefined;
   completedOutputPath: string | null;
+  completionStats: CompletionStats | null;
+
+  // File tracking
+  inputFileName: string | null;
+  outputFileName: string | null;
 
   // Actions
   startProcess: (
@@ -103,6 +134,17 @@ export function FFmpegProvider({ children }: FFmpegProviderProps) {
   const [completedOutputPath, setCompletedOutputPath] = useState<string | null>(
     null,
   );
+  const [completionStats, setCompletionStats] = useState<CompletionStats | null>(
+    null,
+  );
+
+  // File tracking
+  const [inputFileName, setInputFileName] = useState<string | null>(null);
+  const [outputFileName, setOutputFileName] = useState<string | null>(null);
+
+  // Stats tracking refs (don't trigger re-renders)
+  const encodingStartTimeRef = useRef<number | null>(null);
+  const fpsHistoryRef = useRef<number[]>([]);
 
   // Check FFmpeg installation on mount
   useEffect(() => {
@@ -124,7 +166,12 @@ export function FFmpegProvider({ children }: FFmpegProviderProps) {
   // Set up event listeners
   useEffect(() => {
     const unsubProgress = window.ffmpegAPI.onProgress((prog) => {
-      setProgress(prog as FFmpegProgress);
+      const p = prog as FFmpegProgress;
+      setProgress(p);
+      // Track FPS for average calculation
+      if (p.fps > 0) {
+        fpsHistoryRef.current.push(p.fps);
+      }
     });
 
     const unsubLog = window.ffmpegAPI.onLog((data) => {
@@ -134,9 +181,38 @@ export function FFmpegProvider({ children }: FFmpegProviderProps) {
       ]);
     });
 
-    const unsubComplete = window.ffmpegAPI.onComplete((outputPath) => {
+    const unsubComplete = window.ffmpegAPI.onComplete(async (outputPath) => {
       setStatus("completed");
       setCompletedOutputPath(outputPath);
+
+      // Calculate completion stats
+      const endTime = Date.now();
+      const startTime = encodingStartTimeRef.current ?? endTime;
+      const durationMs = endTime - startTime;
+
+      // Format encoding time
+      const totalSeconds = Math.floor(durationMs / 1000);
+      const hours = Math.floor(totalSeconds / 3600);
+      const minutes = Math.floor((totalSeconds % 3600) / 60);
+      const seconds = totalSeconds % 60;
+      const encodingTime =
+        hours > 0
+          ? `${hours}:${minutes.toString().padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`
+          : `${minutes}:${seconds.toString().padStart(2, "0")}`;
+
+      // Calculate average FPS
+      const fpsHistory = fpsHistoryRef.current;
+      const avgFps =
+        fpsHistory.length > 0
+          ? fpsHistory.reduce((a, b) => a + b, 0) / fpsHistory.length
+          : undefined;
+
+      setCompletionStats({
+        encodingTime,
+        outputSize: "—", // File size not available via IPC
+        avgFps,
+      });
+
       setLogs((prev) => [
         ...prev,
         { log: `✓ Process completed successfully!`, type: "success" },
@@ -166,10 +242,20 @@ export function FFmpegProvider({ children }: FFmpegProviderProps) {
       settings: FFmpegEncodingParams,
     ) => {
       try {
+        // Reset state
         setStatus("processing");
         setLogs([]);
         setProgress(null);
         setErrorMessage(undefined);
+        setCompletionStats(null);
+
+        // Track file names
+        setInputFileName(getFileName(videoPath));
+        setOutputFileName(getFileName(outputPath));
+
+        // Initialize stats tracking
+        encodingStartTimeRef.current = Date.now();
+        fpsHistoryRef.current = [];
 
         await window.ffmpegAPI.startProcess({
           videoPath,
@@ -210,6 +296,11 @@ export function FFmpegProvider({ children }: FFmpegProviderProps) {
     setProgress(null);
     setErrorMessage(undefined);
     setCompletedOutputPath(null);
+    setCompletionStats(null);
+    setInputFileName(null);
+    setOutputFileName(null);
+    encodingStartTimeRef.current = null;
+    fpsHistoryRef.current = [];
   }, []);
 
   const openOutputFolder = useCallback(async () => {
@@ -251,6 +342,9 @@ export function FFmpegProvider({ children }: FFmpegProviderProps) {
     progress,
     errorMessage,
     completedOutputPath,
+    completionStats,
+    inputFileName,
+    outputFileName,
     startProcess,
     cancelProcess,
     reset,

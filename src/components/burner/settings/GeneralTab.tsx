@@ -32,6 +32,7 @@ interface GeneralTabProps {
   disabled?: boolean;
   gpuAvailable?: boolean;
   gpuInfo?: string;
+  open?: boolean;
 }
 
 export function GeneralTab({
@@ -40,6 +41,7 @@ export function GeneralTab({
   disabled,
   gpuAvailable,
   gpuInfo,
+  open,
 }: GeneralTabProps) {
   const { t } = useTranslation();
 
@@ -51,8 +53,9 @@ export function GeneralTab({
   const [outputPrefix, setOutputPrefix] = useState<string>("");
   const [saveState, setSaveState] = useState<"idle" | "saving" | "success" | "error">("idle");
 
-  // Load existing output defaults
+  // Load existing output defaults when modal opens
   useEffect(() => {
+    if (!open) return;
     (async () => {
       try {
         const out = await (window as any).settingsAPI?.getOutput?.();
@@ -65,7 +68,7 @@ export function GeneralTab({
         // ignore
       }
     })();
-  }, []);
+  }, [open]);
 
   const handleHardwareAccelChange = (checked: boolean) => {
     onSettingsChange({

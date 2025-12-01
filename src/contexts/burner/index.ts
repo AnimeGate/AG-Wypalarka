@@ -17,6 +17,7 @@ export {
   type LogEntry,
   type FFmpegProgress,
   type FFmpegEncodingParams,
+  type CompletionStats,
 } from "./FFmpegContext";
 
 export {

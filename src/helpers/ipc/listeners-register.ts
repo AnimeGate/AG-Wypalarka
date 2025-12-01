@@ -4,6 +4,7 @@ import { addWindowEventListeners } from "./window/window-listeners";
 import { registerDebugListeners } from "./debug/debug-listeners";
 import { registerUpdaterListeners } from "./updater/updater-listeners";
 import { addFfmpegEventListeners } from "./ffmpeg/ffmpeg-listeners";
+import { registerSettingsListeners } from "./settings/settings-listeners";
 
 export default function registerListeners(mainWindow: BrowserWindow) {
   addWindowEventListeners(mainWindow);
@@ -11,4 +12,5 @@ export default function registerListeners(mainWindow: BrowserWindow) {
   registerDebugListeners(mainWindow);
   registerUpdaterListeners();
   addFfmpegEventListeners(mainWindow);
+  registerSettingsListeners();
 }

@@ -10,6 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { BurnerFileInput, type BurnerFileInputHandle } from "./BurnerFileInput";
 import { BurnerProgressPanel } from "./BurnerProgressPanel";
+import { EncodingView } from "./progress";
 import { BurnerQueuePanel } from "./BurnerQueuePanel";
 import { BurnerQueueProgressPanel } from "./BurnerQueueProgressPanel";
 import { SettingsModal } from "./settings";
@@ -19,7 +20,7 @@ import { DiskSpaceDialog } from "./DiskSpaceDialog";
 import { QueueDiskSpaceDialog } from "./QueueDiskSpaceDialog";
 import { QueueConflictDialog } from "./QueueConflictDialog";
 import { useTranslation } from "react-i18next";
-import { Flame, FolderOpen, Download } from "lucide-react";
+import { Flame, Download } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 import {
@@ -58,7 +59,9 @@ function SubtitleBurnerContent() {
     logs,
     progress,
     errorMessage,
-    completedOutputPath,
+    completionStats,
+    inputFileName,
+    outputFileName,
     cancelProcess,
     reset,
     openOutputFolder,
@@ -170,28 +173,6 @@ function SubtitleBurnerContent() {
               open={settingsDialogOpen}
               onOpenChange={setSettingsDialogOpen}
             />
-
-            {status === "completed" && (
-              <>
-                <Button
-                  variant="default"
-                  onClick={openOutputFolder}
-                  className="gap-2"
-                >
-                  <FolderOpen className="h-4 w-4" />
-                  {t("burnerShowInFolder")}
-                </Button>
-                <Button variant="outline" onClick={reset} className="gap-2">
-                  {t("burnerReset")}
-                </Button>
-              </>
-            )}
-
-            {status === "error" && (
-              <Button variant="outline" onClick={reset} className="gap-2">
-                {t("burnerReset")}
-              </Button>
-            )}
           </div>
         </div>
 
@@ -234,30 +215,49 @@ function SubtitleBurnerContent() {
           </TabsList>
 
           <TabsContent value="single" className="mt-4 flex min-h-0 flex-1 gap-6">
-            {/* Left Panel - File Input */}
-            <div className="w-96 flex-shrink-0 overflow-y-auto">
-              <BurnerFileInput
-                ref={fileInputRef}
-                onFilesSelected={handleStartProcess}
-                disabled={status === "processing" || !ffmpegInstalled}
-                onVideoPathChange={setCurrentVideoPath}
-                onOutputPathChange={setCurrentOutputPath}
-                onReadyChange={setSingleFileReady}
-              />
-            </div>
+            {status === "idle" || status === "error" ? (
+              <>
+                {/* Left Panel - File Input */}
+                <div className="w-96 flex-shrink-0 overflow-y-auto">
+                  <BurnerFileInput
+                    ref={fileInputRef}
+                    onFilesSelected={handleStartProcess}
+                    disabled={!ffmpegInstalled}
+                    onVideoPathChange={setCurrentVideoPath}
+                    onOutputPathChange={setCurrentOutputPath}
+                    onReadyChange={setSingleFileReady}
+                  />
+                </div>
 
-            {/* Right Panel - Progress */}
-            <div className="min-w-0 flex-1">
-              <BurnerProgressPanel
-                logs={logs}
-                progress={progress}
+                {/* Right Panel - Progress */}
+                <div className="min-w-0 flex-1">
+                  <BurnerProgressPanel
+                    logs={logs}
+                    progress={progress}
+                    status={status}
+                    errorMessage={errorMessage}
+                    canStart={singleFileReady && !!ffmpegInstalled}
+                    onStart={handleSingleFileStart}
+                    onCancel={cancelProcess}
+                  />
+                </div>
+              </>
+            ) : (
+              /* Full-width encoding view when processing/completed */
+              <EncodingView
                 status={status}
+                progress={progress}
+                logs={logs}
                 errorMessage={errorMessage}
-                canStart={singleFileReady && !!ffmpegInstalled}
-                onStart={handleSingleFileStart}
+                inputFileName={inputFileName ?? undefined}
+                outputFileName={outputFileName ?? undefined}
+                completionStats={completionStats ?? undefined}
                 onCancel={cancelProcess}
+                onReset={reset}
+                onOpenFolder={openOutputFolder}
+                className="flex-1"
               />
-            </div>
+            )}
           </TabsContent>
 
           <TabsContent value="queue" className="mt-4 flex min-h-0 flex-1 gap-6">

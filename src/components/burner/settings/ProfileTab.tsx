@@ -209,8 +209,8 @@ export function ProfileTab({
         </div>
       )}
 
-      {/* Bitrate Slider */}
-      {showBitrateSlider && (
+      {/* Bitrate Slider - only show for custom profile */}
+      {showBitrateSlider && isCustomProfile && (
         <SliderWithValue
           label={t("burnerCustomBitrate", { defaultValue: "Bitrate" })}
           value={Math.round(currentBitrate)}
@@ -219,14 +219,7 @@ export function ProfileTab({
           max={8000}
           step={100}
           formatValue={(v) => (v >= 1000 ? `${(v / 1000).toFixed(1)}M` : `${v}k`)}
-          description={
-            !isCustomProfile
-              ? t("burnerQualityPresetLockedByProfile", {
-                  defaultValue: "Bitrate jest ustalony przez profil",
-                })
-              : undefined
-          }
-          disabled={disabled || !isCustomProfile}
+          disabled={disabled}
         />
       )}
 

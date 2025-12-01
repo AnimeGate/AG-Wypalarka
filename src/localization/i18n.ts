@@ -311,6 +311,23 @@ i18n.use(initReactI18next).init({
         burnerFfmpegDownloadingStatus: "Pobieranie",
         burnerFfmpegStartingDownload: "Rozpoczynanie pobierania...",
 
+        // Progress Views
+        progressLogs: "Logi FFmpeg",
+        progressCancel: "Anuluj",
+        completedTitle: "Ukończono!",
+        completedOpenFolder: "Pokaż w folderze",
+        completedEncodeAnother: "Koduj kolejny",
+        errorTitle: "Błąd kodowania",
+        errorRetry: "Spróbuj ponownie",
+        statFps: "FPS",
+        statSpeed: "Prędkość",
+        statBitrate: "Bitrate",
+        statTime: "Czas",
+        statDuration: "Czas kodowania",
+        statOutputSize: "Rozmiar",
+        statCompression: "Kompresja",
+        statAvgFps: "Śr. FPS",
+
         // Output Settings
         burnerOutputDefaultsTitle: "Domyślne ustawienia wyjścia",
         burnerOutputDefaultsDesc: "Konfiguruj domyślne zachowanie plików wyjściowych",
@@ -628,6 +645,23 @@ i18n.use(initReactI18next).init({
         burnerFfmpegErrorUnknown: "An unknown error occurred during download.",
         burnerFfmpegDownloadingStatus: "Downloading",
         burnerFfmpegStartingDownload: "Starting download...",
+
+        // Progress Views
+        progressLogs: "FFmpeg Logs",
+        progressCancel: "Cancel",
+        completedTitle: "Completed!",
+        completedOpenFolder: "Show in folder",
+        completedEncodeAnother: "Encode another",
+        errorTitle: "Encoding error",
+        errorRetry: "Try again",
+        statFps: "FPS",
+        statSpeed: "Speed",
+        statBitrate: "Bitrate",
+        statTime: "Time",
+        statDuration: "Encoding time",
+        statOutputSize: "Size",
+        statCompression: "Compression",
+        statAvgFps: "Avg FPS",
 
         // Output Settings
         burnerOutputDefaultsTitle: "Output Defaults",

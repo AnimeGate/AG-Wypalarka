@@ -91,6 +91,7 @@ export function SettingsModal({
               disabled={disabled}
               gpuAvailable={gpuAvailable}
               gpuInfo={gpuInfo}
+              open={open}
             />
           </TabsContent>
 
