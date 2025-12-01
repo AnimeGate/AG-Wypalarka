@@ -75,7 +75,7 @@ export function CollapsibleLogs({
     <Collapsible
       open={isOpen}
       onOpenChange={setIsOpen}
-      className={cn("rounded-lg border", className)}
+      className={cn("min-w-0 overflow-hidden rounded-lg border", className)}
     >
       <CollapsibleTrigger asChild>
         <Button
@@ -106,7 +106,7 @@ export function CollapsibleLogs({
 
       {/* Preview when collapsed - show last 2 lines */}
       {!isOpen && previewLogs.length > 0 && (
-        <div className="bg-muted/30 border-t px-3 py-2 font-mono text-xs">
+        <div className="bg-muted/30 min-w-0 overflow-hidden border-t px-3 py-2 font-mono text-xs">
           {previewLogs.map((entry, index) => (
             <div
               key={logs.length - previewLogs.length + index}

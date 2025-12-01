@@ -57,8 +57,8 @@ export function ProcessingView({
   const { t } = useTranslation();
 
   return (
-    <Card className={cn("flex h-full flex-col", className)}>
-      <CardContent className="flex flex-1 flex-col items-center justify-center gap-6 p-6">
+    <Card className={cn("flex h-full min-w-0 flex-col overflow-hidden", className)}>
+      <CardContent className="flex min-w-0 flex-1 flex-col items-center justify-center gap-6 overflow-hidden p-6">
         {/* Header with Cancel Button */}
         <div className="flex w-full items-center justify-end">
           {onCancel && (
@@ -100,20 +100,20 @@ export function ProcessingView({
 
         {/* File Info */}
         {(inputFileName || outputFileName) && (
-          <div className="bg-muted/30 flex items-center gap-2 rounded-lg px-4 py-2">
-            <FileVideo className="text-muted-foreground h-4 w-4" />
-            <span className="text-muted-foreground max-w-48 truncate text-sm">
+          <div className="bg-muted/30 flex max-w-full items-center gap-2 rounded-lg px-4 py-2">
+            <FileVideo className="text-muted-foreground h-4 w-4 shrink-0" />
+            <span className="text-muted-foreground min-w-0 max-w-48 truncate text-sm">
               {inputFileName}
             </span>
-            <ArrowRight className="text-muted-foreground h-4 w-4" />
-            <span className="max-w-48 truncate text-sm font-medium">
+            <ArrowRight className="text-muted-foreground h-4 w-4 shrink-0" />
+            <span className="min-w-0 max-w-48 truncate text-sm font-medium">
               {outputFileName}
             </span>
           </div>
         )}
 
         {/* Collapsible Logs */}
-        <div className="w-full max-w-2xl">
+        <div className="w-full min-w-0 max-w-2xl">
           <CollapsibleLogs logs={logs} defaultOpen={false} />
         </div>
       </CardContent>
