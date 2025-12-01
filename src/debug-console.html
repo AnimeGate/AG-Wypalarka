@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Electron App - Debug Console</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+      background: #0d1117;
+      color: #c9d1d9;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+    }
+
+    #header {
+      background: #161b22;
+      padding: 8px 16px;
+      border-bottom: 1px solid #30363d;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    #header h1 {
+      font-size: 14px;
+      font-weight: 600;
+      color: #58a6ff;
+    }
+
+    #controls {
+      display: flex;
+      gap: 8px;
+    }
+
+    #controls button {
+      background: #21262d;
+      border: 1px solid #30363d;
+      color: #c9d1d9;
+      padding: 4px 12px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 12px;
+      font-family: inherit;
+    }
+
+    #controls button:hover {
+      background: #30363d;
+      border-color: #58a6ff;
+    }
+
+    #controls button.active {
+      background: #238636;
+      border-color: #2ea043;
+      color: #ffffff;
+    }
+
+    #toolbar {
+      background: #161b22;
+      padding: 8px 16px;
+      border-bottom: 1px solid #30363d;
+      display: flex;
+      gap: 16px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    #searchBox {
+      background: #0d1117;
+      border: 1px solid #30363d;
+      color: #c9d1d9;
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 12px;
+      font-family: inherit;
+      width: 200px;
+    }
+
+    #searchBox:focus {
+      outline: none;
+      border-color: #58a6ff;
+    }
+
+    #filters {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .filter-label {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 11px;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .filter-label input[type="checkbox"] {
+      cursor: pointer;
+    }
+
+    #console {
+      flex: 1;
+      overflow-y: auto;
+      padding: 8px;
+      font-size: 12px;
+      line-height: 1.6;
+    }
+
+    .log-entry {
+      padding: 2px 8px;
+      border-left: 3px solid transparent;
+      margin-bottom: 1px;
+      display: none;
+    }
+
+    .log-entry.visible {
+      display: block;
+    }
+
+    .log-entry.info {
+      border-left-color: #58a6ff;
+    }
+
+    .log-entry.success {
+      border-left-color: #3fb950;
+      color: #3fb950;
+    }
+
+    .log-entry.warn {
+      border-left-color: #d29922;
+      color: #d29922;
+    }
+
+    .log-entry.error {
+      border-left-color: #f85149;
+      color: #f85149;
+    }
+
+    .log-entry.debug {
+      border-left-color: #8b949e;
+      color: #8b949e;
+    }
+
+    .log-entry.route {
+      border-left-color: #a371f7;
+      color: #a371f7;
+    }
+
+    .log-entry.ipc {
+      border-left-color: #56d364;
+      color: #56d364;
+    }
+
+    .log-entry.updater {
+      border-left-color: #f7b731;
+      color: #f7b731;
+    }
+
+    .log-entry.highlight {
+      background: rgba(88, 166, 255, 0.1);
+    }
+
+    .timestamp {
+      color: #6e7681;
+      margin-right: 8px;
+    }
+
+    .level {
+      font-weight: 600;
+      margin-right: 8px;
+      display: inline-block;
+      min-width: 80px;
+    }
+
+    #console::-webkit-scrollbar {
+      width: 12px;
+    }
+
+    #console::-webkit-scrollbar-track {
+      background: #0d1117;
+    }
+
+    #console::-webkit-scrollbar-thumb {
+      background: #30363d;
+      border-radius: 6px;
+    }
+
+    #console::-webkit-scrollbar-thumb:hover {
+      background: #484f58;
+    }
+
+    #stats {
+      background: #161b22;
+      border-top: 1px solid #30363d;
+      padding: 6px 16px;
+      font-size: 11px;
+      color: #8b949e;
+      display: flex;
+      gap: 20px;
+      align-items: center;
+    }
+
+    #stats span {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+    }
+
+    #stats .count {
+      font-weight: 600;
+      color: #c9d1d9;
+    }
+
+    #memoryInfo {
+      margin-left: auto;
+      display: flex;
+      gap: 16px;
+    }
+
+    .memory-stat {
+      display: flex;
+      gap: 4px;
+    }
+
+    .memory-value {
+      font-weight: 600;
+      color: #58a6ff;
+    }
+  </style>
+</head>
+<body>
+  <div id="header">
+    <h1>🐛 Electron App Debug Console</h1>
+    <div id="controls">
+      <button id="autoScrollBtn" class="active" title="Toggle auto-scroll">📜 Auto-scroll</button>
+      <button id="clearBtn">🗑️ Clear</button>
+      <button id="exportBtn">💾 Export</button>
+    </div>
+  </div>
+
+  <div id="toolbar">
+    <input type="text" id="searchBox" placeholder="🔍 Search logs..." />
+    <div id="filters">
+      <span style="font-size: 11px; color: #8b949e;">Filters:</span>
+      <label class="filter-label" style="color: #58a6ff;">
+        <input type="checkbox" id="filter-info" checked> Info
+      </label>
+      <label class="filter-label" style="color: #3fb950;">
+        <input type="checkbox" id="filter-success" checked> Success
+      </label>
+      <label class="filter-label" style="color: #d29922;">
+        <input type="checkbox" id="filter-warn" checked> Warn
+      </label>
+      <label class="filter-label" style="color: #f85149;">
+        <input type="checkbox" id="filter-error" checked> Error
+      </label>
+      <label class="filter-label" style="color: #8b949e;">
+        <input type="checkbox" id="filter-debug" checked> Debug
+      </label>
+      <label class="filter-label" style="color: #a371f7;">
+        <input type="checkbox" id="filter-route" checked> Route
+      </label>
+      <label class="filter-label" style="color: #56d364;">
+        <input type="checkbox" id="filter-ipc" checked> IPC
+      </label>
+      <label class="filter-label" style="color: #f7b731;">
+        <input type="checkbox" id="filter-updater" checked> Updater
+      </label>
+    </div>
+  </div>
+
+  <div id="console"></div>
+
+  <div id="stats">
+    <span>Total: <span class="count" id="totalCount">0</span></span>
+    <span>Visible: <span class="count" id="visibleCount">0</span></span>
+    <span>Errors: <span class="count" id="errorCount">0</span></span>
+    <span>Warnings: <span class="count" id="warnCount">0</span></span>
+    <div id="memoryInfo">
+      <span class="memory-stat">
+        <span>Heap:</span>
+        <span class="memory-value" id="heapUsed">0 MB</span>
+      </span>
+      <span class="memory-stat">
+        <span>Total:</span>
+        <span class="memory-value" id="heapTotal">0 MB</span>
+      </span>
+    </div>
+  </div>
+
+  <script>
+    const consoleEl = document.getElementById('console');
+    const clearBtn = document.getElementById('clearBtn');
+    const exportBtn = document.getElementById('exportBtn');
+    const autoScrollBtn = document.getElementById('autoScrollBtn');
+    const searchBox = document.getElementById('searchBox');
+    const totalCountEl = document.getElementById('totalCount');
+    const visibleCountEl = document.getElementById('visibleCount');
+    const errorCountEl = document.getElementById('errorCount');
+    const warnCountEl = document.getElementById('warnCount');
+    const heapUsedEl = document.getElementById('heapUsed');
+    const heapTotalEl = document.getElementById('heapTotal');
+
+    let logs = [];
+    let totalCount = 0;
+    let errorCount = 0;
+    let warnCount = 0;
+    let autoScroll = true;
+    let searchQuery = '';
+    let levelFilters = {
+      info: true,
+      success: true,
+      warn: true,
+      error: true,
+      debug: true,
+      route: true,
+      ipc: true,
+      updater: true
+    };
+
+    // Auto-scroll detection
+    consoleEl.addEventListener('scroll', () => {
+      const isAtBottom = consoleEl.scrollHeight - consoleEl.scrollTop <= consoleEl.clientHeight + 50;
+      if (autoScroll !== isAtBottom) {
+        autoScroll = isAtBottom;
+        updateAutoScrollButton();
+      }
+    });
+
+    // Auto-scroll toggle
+    autoScrollBtn.addEventListener('click', () => {
+      autoScroll = !autoScroll;
+      updateAutoScrollButton();
+      if (autoScroll) {
+        consoleEl.scrollTop = consoleEl.scrollHeight;
+      }
+    });
+
+    function updateAutoScrollButton() {
+      if (autoScroll) {
+        autoScrollBtn.classList.add('active');
+      } else {
+        autoScrollBtn.classList.remove('active');
+      }
+    }
+
+    // Search functionality
+    searchBox.addEventListener('input', (e) => {
+      searchQuery = e.target.value.toLowerCase();
+      filterLogs();
+    });
+
+    // Level filters
+    ['info', 'success', 'warn', 'error', 'debug', 'route', 'ipc', 'updater'].forEach(level => {
+      const checkbox = document.getElementById(`filter-${level}`);
+      checkbox.addEventListener('change', (e) => {
+        levelFilters[level] = e.target.checked;
+        filterLogs();
+      });
+    });
+
+    function filterLogs() {
+      let visibleCount = 0;
+      const entries = consoleEl.querySelectorAll('.log-entry');
+
+      entries.forEach((entry) => {
+        const level = entry.dataset.level;
+        const text = entry.textContent.toLowerCase();
+
+        const matchesFilter = levelFilters[level];
+        const matchesSearch = searchQuery === '' || text.includes(searchQuery);
+
+        if (matchesFilter && matchesSearch) {
+          entry.classList.add('visible');
+          if (searchQuery !== '') {
+            entry.classList.add('highlight');
+          } else {
+            entry.classList.remove('highlight');
+          }
+          visibleCount++;
+        } else {
+          entry.classList.remove('visible', 'highlight');
+        }
+      });
+
+      visibleCountEl.textContent = visibleCount;
+    }
+
+    function addLog(level, message, args) {
+      const timestamp = new Date().toLocaleTimeString('en-US', {
+        hour12: false,
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        fractionalSecondDigits: 3
+      });
+
+      const entry = document.createElement('div');
+      entry.className = `log-entry ${level}`;
+      entry.dataset.level = level;
+
+      const timestampSpan = document.createElement('span');
+      timestampSpan.className = 'timestamp';
+      timestampSpan.textContent = timestamp;
+
+      const levelSpan = document.createElement('span');
+      levelSpan.className = 'level';
+      levelSpan.textContent = getLevelDisplay(level);
+
+      const messageSpan = document.createElement('span');
+      messageSpan.textContent = message;
+      if (args && args.length > 0) {
+        messageSpan.textContent += ' ' + args.map(arg =>
+          typeof arg === 'object' ? JSON.stringify(arg) : String(arg)
+        ).join(' ');
+      }
+
+      entry.appendChild(timestampSpan);
+      entry.appendChild(levelSpan);
+      entry.appendChild(messageSpan);
+
+      consoleEl.appendChild(entry);
+      logs.push({ timestamp, level, message, args, element: entry });
+
+      // Update stats
+      totalCount++;
+      if (level === 'error') errorCount++;
+      if (level === 'warn') warnCount++;
+
+      totalCountEl.textContent = totalCount;
+      errorCountEl.textContent = errorCount;
+      warnCountEl.textContent = warnCount;
+
+      // Apply filters
+      const matchesFilter = levelFilters[level];
+      const text = entry.textContent.toLowerCase();
+      const matchesSearch = searchQuery === '' || text.includes(searchQuery);
+
+      if (matchesFilter && matchesSearch) {
+        entry.classList.add('visible');
+        if (searchQuery !== '') {
+          entry.classList.add('highlight');
+        }
+        const currentVisible = parseInt(visibleCountEl.textContent);
+        visibleCountEl.textContent = currentVisible + 1;
+      }
+
+      // Auto-scroll if enabled
+      if (autoScroll) {
+        consoleEl.scrollTop = consoleEl.scrollHeight;
+      }
+
+      // Limit logs to prevent memory issues
+      if (logs.length > 10000) {
+        const removed = logs.shift();
+        if (removed.element && removed.element.parentNode) {
+          removed.element.remove();
+        }
+        totalCount--;
+        totalCountEl.textContent = totalCount;
+      }
+    }
+
+    function getLevelDisplay(level) {
+      const displays = {
+        info: 'ℹ️  INFO',
+        success: '✅ SUCCESS',
+        warn: '⚠️  WARN',
+        error: '❌ ERROR',
+        debug: '🔍 DEBUG',
+        route: '🧭 ROUTE',
+        ipc: '📡 IPC',
+        updater: '🔄 UPDATER'
+      };
+      return displays[level] || level.toUpperCase();
+    }
+
+    clearBtn.addEventListener('click', () => {
+      consoleEl.innerHTML = '';
+      logs = [];
+      totalCount = 0;
+      errorCount = 0;
+      warnCount = 0;
+      totalCountEl.textContent = '0';
+      visibleCountEl.textContent = '0';
+      errorCountEl.textContent = '0';
+      warnCountEl.textContent = '0';
+    });
+
+    exportBtn.addEventListener('click', () => {
+      const logText = logs.map(log =>
+        `[${log.timestamp}] [${log.level.toUpperCase()}] ${log.message}${log.args && log.args.length > 0 ? ' ' + log.args.join(' ') : ''}`
+      ).join('\n');
+
+      const blob = new Blob([logText], { type: 'text/plain' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `debug-log-${new Date().toISOString().replace(/[:.]/g, '-')}.txt`;
+      a.click();
+      URL.revokeObjectURL(url);
+    });
+
+    // Update memory usage
+    function updateMemoryInfo() {
+      if (performance && performance.memory) {
+        const used = (performance.memory.usedJSHeapSize / 1024 / 1024).toFixed(2);
+        const total = (performance.memory.totalJSHeapSize / 1024 / 1024).toFixed(2);
+        heapUsedEl.textContent = `${used} MB`;
+        heapTotalEl.textContent = `${total} MB`;
+      }
+    }
+
+    // Update memory every 2 seconds
+    setInterval(updateMemoryInfo, 2000);
+    updateMemoryInfo();
+
+    // Listen for log messages from main process
+    window.addEventListener('log', (event) => {
+      const { level, message, args } = event.detail;
+      addLog(level, message, args);
+    });
+  </script>
+</body>
+</html>
