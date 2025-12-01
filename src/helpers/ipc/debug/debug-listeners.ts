@@ -2,6 +2,24 @@ import { BrowserWindow, ipcMain } from "electron";
 import { DEBUG_CHANNELS } from "./debug-channels";
 import { debugLog } from "../../debug-mode";
 
+type DebugLogLevel =
+  | "info"
+  | "success"
+  | "warn"
+  | "error"
+  | "debug"
+  | "route"
+  | "ipc"
+  | "updater"
+  | "ffmpeg"
+  | "queue"
+  | "file"
+  | "legal"
+  | "perf"
+  | "network"
+  | "state"
+  | "lifecycle";
+
 /**
  * Register debug IPC listeners
  */
@@ -12,19 +30,7 @@ export function registerDebugListeners(_mainWindow: BrowserWindow): void {
     (
       _event,
       data: {
-        level:
-          | "info"
-          | "success"
-          | "warn"
-          | "error"
-          | "debug"
-          | "route"
-          | "ipc"
-          | "updater"
-          | "ffmpeg"
-          | "queue"
-          | "file"
-          | "legal";
+        level: DebugLogLevel;
         message: string;
         args: unknown[];
       }
@@ -68,6 +74,18 @@ export function registerDebugListeners(_mainWindow: BrowserWindow): void {
           break;
         case "legal":
           debugLog.legal(message, ...args);
+          break;
+        case "perf":
+          debugLog.perf(message, ...args);
+          break;
+        case "network":
+          debugLog.network(message, ...args);
+          break;
+        case "state":
+          debugLog.state(message, ...args);
+          break;
+        case "lifecycle":
+          debugLog.lifecycle(message, ...args);
           break;
       }
     }

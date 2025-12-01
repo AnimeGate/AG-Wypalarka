@@ -2,6 +2,7 @@ import log from "electron-log";
 import { app, BrowserWindow } from "electron";
 import path from "path";
 import { DEBUG_CONSOLE } from "../config/app.config";
+import { windowRegistry } from "./window-registry";
 
 let isDebugMode = false;
 let debugConsoleWindow: BrowserWindow | null = null;
@@ -110,10 +111,24 @@ export function createDebugConsole(): void {
 export function sendToDebugConsole(
   level: string,
   message: string,
-  args: unknown[] = []
+  args: unknown[] = [],
+  windowId?: number
 ): void {
   if (debugConsoleWindow && !debugConsoleWindow.isDestroyed()) {
-    debugConsoleWindow.webContents.send("debug:log", { level, message, args });
+    const windowInfo = windowId
+      ? {
+          id: windowId,
+          name: windowRegistry.getName(windowId),
+          color: windowRegistry.getColor(windowId),
+        }
+      : { id: 0, name: "Main", color: "#58a6ff" };
+
+    debugConsoleWindow.webContents.send("debug:log", {
+      level,
+      message,
+      args,
+      window: windowInfo,
+    });
   }
 }
 
@@ -209,6 +224,34 @@ export const debugLog = {
     if (isDebugMode) {
       log.info(`⚖️  [LEGAL] ${message}`, ...args);
       sendToDebugConsole("legal", message, args);
+    }
+  },
+
+  perf: (message: string, ...args: unknown[]) => {
+    if (isDebugMode) {
+      log.info(`⚡ [PERF] ${message}`, ...args);
+      sendToDebugConsole("perf", message, args);
+    }
+  },
+
+  network: (message: string, ...args: unknown[]) => {
+    if (isDebugMode) {
+      log.info(`🌐 [NETWORK] ${message}`, ...args);
+      sendToDebugConsole("network", message, args);
+    }
+  },
+
+  state: (message: string, ...args: unknown[]) => {
+    if (isDebugMode) {
+      log.info(`📊 [STATE] ${message}`, ...args);
+      sendToDebugConsole("state", message, args);
+    }
+  },
+
+  lifecycle: (message: string, ...args: unknown[]) => {
+    if (isDebugMode) {
+      log.info(`🔃 [LIFECYCLE] ${message}`, ...args);
+      sendToDebugConsole("lifecycle", message, args);
     }
   },
 };

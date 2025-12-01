@@ -95,4 +95,40 @@ export const debugLog = {
       window.debugAPI.legal(message, ...args);
     }
   },
+
+  /**
+   * Log performance metrics
+   */
+  perf: (message: string, ...args: unknown[]) => {
+    if (window.debugAPI) {
+      window.debugAPI.perf(message, ...args);
+    }
+  },
+
+  /**
+   * Log network requests
+   */
+  network: (message: string, ...args: unknown[]) => {
+    if (window.debugAPI) {
+      window.debugAPI.network(message, ...args);
+    }
+  },
+
+  /**
+   * Log state changes
+   */
+  state: (message: string, ...args: unknown[]) => {
+    if (window.debugAPI) {
+      window.debugAPI.state(message, ...args);
+    }
+  },
+
+  /**
+   * Log lifecycle events
+   */
+  lifecycle: (message: string, ...args: unknown[]) => {
+    if (window.debugAPI) {
+      window.debugAPI.lifecycle(message, ...args);
+    }
+  },
 };

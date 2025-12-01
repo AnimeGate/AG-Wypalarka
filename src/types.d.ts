@@ -19,24 +19,26 @@ interface ElectronWindow {
   close: () => Promise<void>;
 }
 
+type DebugLogLevel =
+  | "info"
+  | "success"
+  | "warn"
+  | "error"
+  | "debug"
+  | "route"
+  | "ipc"
+  | "updater"
+  | "ffmpeg"
+  | "queue"
+  | "file"
+  | "legal"
+  | "perf"
+  | "network"
+  | "state"
+  | "lifecycle";
+
 interface DebugAPI {
-  log: (
-    level:
-      | "info"
-      | "success"
-      | "warn"
-      | "error"
-      | "debug"
-      | "route"
-      | "ipc"
-      | "updater"
-      | "ffmpeg"
-      | "queue"
-      | "file"
-      | "legal",
-    message: string,
-    ...args: unknown[]
-  ) => void;
+  log: (level: DebugLogLevel, message: string, ...args: unknown[]) => void;
   info: (message: string, ...args: unknown[]) => void;
   success: (message: string, ...args: unknown[]) => void;
   warn: (message: string, ...args: unknown[]) => void;
@@ -49,6 +51,10 @@ interface DebugAPI {
   queue: (message: string, ...args: unknown[]) => void;
   file: (message: string, ...args: unknown[]) => void;
   legal: (message: string, ...args: unknown[]) => void;
+  perf: (message: string, ...args: unknown[]) => void;
+  network: (message: string, ...args: unknown[]) => void;
+  state: (message: string, ...args: unknown[]) => void;
+  lifecycle: (message: string, ...args: unknown[]) => void;
 }
 
 interface UpdaterAPI {

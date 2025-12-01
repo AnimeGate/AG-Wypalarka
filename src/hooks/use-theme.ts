@@ -1,5 +1,6 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { ThemeMode } from "@/types/theme-mode";
+import { THEME_CHANGE_EVENT } from "@/helpers/theme_helpers";
 
 const THEME_KEY = "theme";
 
@@ -9,28 +10,33 @@ export function useTheme() {
     return stored || "system";
   });
 
+  const updateTheme = useCallback(() => {
+    const stored = localStorage.getItem(THEME_KEY) as ThemeMode | null;
+    setThemeState(stored || "system");
+  }, []);
+
   useEffect(() => {
-    const handleStorageChange = () => {
-      const stored = localStorage.getItem(THEME_KEY) as ThemeMode | null;
-      setThemeState(stored || "system");
+    // Listen for theme changes from other tabs/windows
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === THEME_KEY) {
+        updateTheme();
+      }
     };
 
-    // Listen for storage changes
+    // Listen for theme changes from same window (custom event)
+    const handleThemeChange = (e: Event) => {
+      const customEvent = e as CustomEvent<{ theme: ThemeMode }>;
+      setThemeState(customEvent.detail.theme);
+    };
+
     window.addEventListener("storage", handleStorageChange);
-
-    // Also listen for theme changes from our own app
-    const checkTheme = () => {
-      const stored = localStorage.getItem(THEME_KEY) as ThemeMode | null;
-      setThemeState(stored || "system");
-    };
-
-    const interval = setInterval(checkTheme, 100);
+    window.addEventListener(THEME_CHANGE_EVENT, handleThemeChange);
 
     return () => {
       window.removeEventListener("storage", handleStorageChange);
-      clearInterval(interval);
+      window.removeEventListener(THEME_CHANGE_EVENT, handleThemeChange);
     };
-  }, []);
+  }, [updateTheme]);
 
   return { theme };
 }

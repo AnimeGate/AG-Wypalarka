@@ -92,6 +92,7 @@
       display: flex;
       gap: 12px;
       align-items: center;
+      flex-wrap: wrap;
     }
 
     .filter-label {
@@ -123,67 +124,27 @@
     }
 
     .log-entry.visible {
-      display: block;
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
     }
 
-    .log-entry.info {
-      border-left-color: #58a6ff;
-    }
-
-    .log-entry.success {
-      border-left-color: #3fb950;
-      color: #3fb950;
-    }
-
-    .log-entry.warn {
-      border-left-color: #d29922;
-      color: #d29922;
-    }
-
-    .log-entry.error {
-      border-left-color: #f85149;
-      color: #f85149;
-    }
-
-    .log-entry.debug {
-      border-left-color: #8b949e;
-      color: #8b949e;
-    }
-
-    .log-entry.route {
-      border-left-color: #a371f7;
-      color: #a371f7;
-    }
-
-    .log-entry.ipc {
-      border-left-color: #56d364;
-      color: #56d364;
-    }
-
-    .log-entry.updater {
-      border-left-color: #f7b731;
-      color: #f7b731;
-    }
-
-    .log-entry.ffmpeg {
-      border-left-color: #ff7b54;
-      color: #ff7b54;
-    }
-
-    .log-entry.queue {
-      border-left-color: #54d9ff;
-      color: #54d9ff;
-    }
-
-    .log-entry.file {
-      border-left-color: #79c0ff;
-      color: #79c0ff;
-    }
-
-    .log-entry.legal {
-      border-left-color: #d2a8ff;
-      color: #d2a8ff;
-    }
+    .log-entry.info { border-left-color: #58a6ff; }
+    .log-entry.success { border-left-color: #3fb950; color: #3fb950; }
+    .log-entry.warn { border-left-color: #d29922; color: #d29922; }
+    .log-entry.error { border-left-color: #f85149; color: #f85149; }
+    .log-entry.debug { border-left-color: #8b949e; color: #8b949e; }
+    .log-entry.route { border-left-color: #a371f7; color: #a371f7; }
+    .log-entry.ipc { border-left-color: #56d364; color: #56d364; }
+    .log-entry.updater { border-left-color: #f7b731; color: #f7b731; }
+    .log-entry.ffmpeg { border-left-color: #ff7b54; color: #ff7b54; }
+    .log-entry.queue { border-left-color: #54d9ff; color: #54d9ff; }
+    .log-entry.file { border-left-color: #79c0ff; color: #79c0ff; }
+    .log-entry.legal { border-left-color: #d2a8ff; color: #d2a8ff; }
+    .log-entry.perf { border-left-color: #ff6b6b; color: #ff6b6b; }
+    .log-entry.network { border-left-color: #4ecdc4; color: #4ecdc4; }
+    .log-entry.state { border-left-color: #ffe66d; color: #ffe66d; }
+    .log-entry.lifecycle { border-left-color: #95e1d3; color: #95e1d3; }
 
     .log-entry.highlight {
       background: rgba(88, 166, 255, 0.1);
@@ -191,14 +152,27 @@
 
     .timestamp {
       color: #6e7681;
-      margin-right: 8px;
+      flex-shrink: 0;
+    }
+
+    .window-badge {
+      padding: 1px 6px;
+      border-radius: 3px;
+      font-size: 10px;
+      font-weight: 600;
+      flex-shrink: 0;
     }
 
     .level {
       font-weight: 600;
-      margin-right: 8px;
       display: inline-block;
       min-width: 80px;
+      flex-shrink: 0;
+    }
+
+    .message {
+      flex: 1;
+      word-break: break-word;
     }
 
     #console::-webkit-scrollbar {
@@ -307,6 +281,18 @@
       <label class="filter-label" style="color: #d2a8ff;">
         <input type="checkbox" id="filter-legal" checked> Legal
       </label>
+      <label class="filter-label" style="color: #ff6b6b;">
+        <input type="checkbox" id="filter-perf" checked> Perf
+      </label>
+      <label class="filter-label" style="color: #4ecdc4;">
+        <input type="checkbox" id="filter-network" checked> Network
+      </label>
+      <label class="filter-label" style="color: #ffe66d;">
+        <input type="checkbox" id="filter-state" checked> State
+      </label>
+      <label class="filter-label" style="color: #95e1d3;">
+        <input type="checkbox" id="filter-lifecycle" checked> Lifecycle
+      </label>
     </div>
   </div>
 
@@ -360,7 +346,11 @@
       ffmpeg: true,
       queue: true,
       file: true,
-      legal: true
+      legal: true,
+      perf: true,
+      network: true,
+      state: true,
+      lifecycle: true
     };
 
     // Auto-scroll detection
@@ -396,12 +386,15 @@
     });
 
     // Level filters
-    ['info', 'success', 'warn', 'error', 'debug', 'route', 'ipc', 'updater', 'ffmpeg', 'queue', 'file', 'legal'].forEach(level => {
+    const allLevels = ['info', 'success', 'warn', 'error', 'debug', 'route', 'ipc', 'updater', 'ffmpeg', 'queue', 'file', 'legal', 'perf', 'network', 'state', 'lifecycle'];
+    allLevels.forEach(level => {
       const checkbox = document.getElementById(`filter-${level}`);
-      checkbox.addEventListener('change', (e) => {
-        levelFilters[level] = e.target.checked;
-        filterLogs();
-      });
+      if (checkbox) {
+        checkbox.addEventListener('change', (e) => {
+          levelFilters[level] = e.target.checked;
+          filterLogs();
+        });
+      }
     });
 
     function filterLogs() {
@@ -431,7 +424,7 @@
       visibleCountEl.textContent = visibleCount;
     }
 
-    function addLog(level, message, args) {
+    function addLog(level, message, args, windowInfo) {
       const timestamp = new Date().toLocaleTimeString('en-US', {
         hour12: false,
         hour: '2-digit',
@@ -447,25 +440,35 @@
       const timestampSpan = document.createElement('span');
       timestampSpan.className = 'timestamp';
       timestampSpan.textContent = timestamp;
+      entry.appendChild(timestampSpan);
+
+      // Add window badge if window info provided
+      if (windowInfo && windowInfo.name) {
+        const windowBadge = document.createElement('span');
+        windowBadge.className = 'window-badge';
+        windowBadge.textContent = windowInfo.name;
+        windowBadge.style.backgroundColor = windowInfo.color || '#58a6ff';
+        windowBadge.style.color = '#0d1117';
+        entry.appendChild(windowBadge);
+      }
 
       const levelSpan = document.createElement('span');
       levelSpan.className = 'level';
       levelSpan.textContent = getLevelDisplay(level);
+      entry.appendChild(levelSpan);
 
       const messageSpan = document.createElement('span');
+      messageSpan.className = 'message';
       messageSpan.textContent = message;
       if (args && args.length > 0) {
         messageSpan.textContent += ' ' + args.map(arg =>
           typeof arg === 'object' ? JSON.stringify(arg) : String(arg)
         ).join(' ');
       }
-
-      entry.appendChild(timestampSpan);
-      entry.appendChild(levelSpan);
       entry.appendChild(messageSpan);
 
       consoleEl.appendChild(entry);
-      logs.push({ timestamp, level, message, args, element: entry });
+      logs.push({ timestamp, level, message, args, windowInfo, element: entry });
 
       // Update stats
       totalCount++;
@@ -519,7 +522,11 @@
         ffmpeg: '🎬 FFMPEG',
         queue: '📋 QUEUE',
         file: '📁 FILE',
-        legal: '⚖️  LEGAL'
+        legal: '⚖️  LEGAL',
+        perf: '⚡ PERF',
+        network: '🌐 NETWORK',
+        state: '📊 STATE',
+        lifecycle: '🔃 LIFECYCLE'
       };
       return displays[level] || level.toUpperCase();
     }
@@ -537,9 +544,10 @@
     });
 
     exportBtn.addEventListener('click', () => {
-      const logText = logs.map(log =>
-        `[${log.timestamp}] [${log.level.toUpperCase()}] ${log.message}${log.args && log.args.length > 0 ? ' ' + log.args.join(' ') : ''}`
-      ).join('\n');
+      const logText = logs.map(log => {
+        const windowName = log.windowInfo?.name ? `[${log.windowInfo.name}] ` : '';
+        return `[${log.timestamp}] ${windowName}[${log.level.toUpperCase()}] ${log.message}${log.args && log.args.length > 0 ? ' ' + log.args.join(' ') : ''}`;
+      }).join('\n');
 
       const blob = new Blob([logText], { type: 'text/plain' });
       const url = URL.createObjectURL(blob);
@@ -566,8 +574,8 @@
 
     // Listen for log messages from main process
     window.addEventListener('log', (event) => {
-      const { level, message, args } = event.detail;
-      addLog(level, message, args);
+      const { level, message, args, window: windowInfo } = event.detail;
+      addLog(level, message, args, windowInfo);
     });
   </script>
 </body>

@@ -1,6 +1,14 @@
 import { ThemeMode } from "@/types/theme-mode";
 
 const THEME_KEY = "theme";
+export const THEME_CHANGE_EVENT = "app:theme-changed";
+
+/**
+ * Dispatch theme change event for same-window listeners
+ */
+function dispatchThemeChange(theme: ThemeMode) {
+  window.dispatchEvent(new CustomEvent(THEME_CHANGE_EVENT, { detail: { theme } }));
+}
 
 export interface ThemePreferences {
   system: ThemeMode;
@@ -35,6 +43,7 @@ export async function setTheme(newTheme: ThemeMode) {
   }
 
   localStorage.setItem(THEME_KEY, newTheme);
+  dispatchThemeChange(newTheme);
 }
 
 export async function toggleTheme() {
@@ -43,6 +52,7 @@ export async function toggleTheme() {
 
   updateDocumentTheme(isDarkMode);
   localStorage.setItem(THEME_KEY, newTheme);
+  dispatchThemeChange(newTheme);
 }
 
 export async function syncThemeWithLocal() {

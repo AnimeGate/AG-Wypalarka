@@ -16,17 +16,20 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
-import { ChevronDown, ChevronRight, History, Loader2, AlertCircle } from "lucide-react";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { ChevronDown, ChevronRight, History, Loader2, AlertCircle, RefreshCw } from "lucide-react";
 import { APP_CONFIG } from "@/config/app.config";
-
-interface GitHubRelease {
-  id: number;
-  tag_name: string;
-  name: string;
-  body: string;
-  published_at: string;
-  html_url: string;
-}
+import {
+  fetchReleasesWithCache,
+  getCacheInfo,
+  clearReleasesCache,
+  type GitHubRelease,
+} from "@/helpers/github-cache";
 
 export function ChangelogHistoryDialog() {
   const { t } = useTranslation();
@@ -35,6 +38,8 @@ export function ChangelogHistoryDialog() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [expandedReleases, setExpandedReleases] = useState<Set<number>>(new Set());
+  const [fromCache, setFromCache] = useState(false);
+  const [cacheRemainingMs, setCacheRemainingMs] = useState(0);
 
   // Build GitHub API URL from config
   const githubApiUrl = APP_CONFIG.github?.owner && APP_CONFIG.github?.repo
@@ -47,7 +52,24 @@ export function ChangelogHistoryDialog() {
     }
   }, [open]);
 
-  const fetchReleases = async () => {
+  // Update cache timer every second when dialog is open
+  useEffect(() => {
+    if (!open || !fromCache) return;
+
+    const interval = setInterval(() => {
+      const info = getCacheInfo();
+      if (info.remainingMs > 0) {
+        setCacheRemainingMs(info.remainingMs);
+      } else {
+        setCacheRemainingMs(0);
+        setFromCache(false);
+      }
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [open, fromCache]);
+
+  const fetchReleases = async (forceRefresh = false) => {
     if (!githubApiUrl) {
       setError(t("changelogNoConfig"));
       return;
@@ -56,28 +78,31 @@ export function ChangelogHistoryDialog() {
     setLoading(true);
     setError(null);
     try {
-      const response = await fetch(githubApiUrl, {
-        headers: {
-          Accept: "application/vnd.github.v3+json",
-        },
+      const result = await fetchReleasesWithCache(githubApiUrl, {
+        forceRefresh,
+        ttlMs: 15 * 60 * 1000, // 15 minutes
       });
 
-      if (!response.ok) {
-        throw new Error(`GitHub API error: ${response.status}`);
-      }
+      setReleases(result.releases);
+      setFromCache(result.fromCache);
 
-      const data: GitHubRelease[] = await response.json();
-      setReleases(data);
+      const info = getCacheInfo();
+      setCacheRemainingMs(info.remainingMs);
 
       // Auto-expand the first (latest) release
-      if (data.length > 0) {
-        setExpandedReleases(new Set([data[0].id]));
+      if (result.releases.length > 0) {
+        setExpandedReleases(new Set([result.releases[0].id]));
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to fetch releases");
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleRefresh = () => {
+    clearReleasesCache();
+    fetchReleases(true);
   };
 
   const toggleRelease = (id: number) => {
@@ -100,6 +125,13 @@ export function ChangelogHistoryDialog() {
     });
   };
 
+  const formatCacheTime = (ms: number) => {
+    const minutes = Math.floor(ms / 60000);
+    const seconds = Math.floor((ms % 60000) / 1000);
+    if (minutes > 0) return `${minutes}m ${seconds}s`;
+    return `${seconds}s`;
+  };
+
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
@@ -110,10 +142,37 @@ export function ChangelogHistoryDialog() {
       </DialogTrigger>
       <DialogContent className="sm:max-w-2xl">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <History className="h-5 w-5" />
-            {t("changelogHistoryTitle")}
-          </DialogTitle>
+          <div className="flex items-center justify-between">
+            <DialogTitle className="flex items-center gap-2">
+              <History className="h-5 w-5" />
+              {t("changelogHistoryTitle")}
+            </DialogTitle>
+            <div className="flex items-center gap-2">
+              {fromCache && cacheRemainingMs > 0 && (
+                <span className="text-xs text-muted-foreground">
+                  {t("changelogCached", { time: formatCacheTime(cacheRemainingMs) })}
+                </span>
+              )}
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8"
+                      onClick={handleRefresh}
+                      disabled={loading}
+                    >
+                      <RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>{t("changelogRefresh")}</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            </div>
+          </div>
           <DialogDescription>{t("changelogHistoryDesc")}</DialogDescription>
         </DialogHeader>
 
@@ -140,7 +199,7 @@ export function ChangelogHistoryDialog() {
             <div className="flex flex-col items-center justify-center gap-2 py-8 text-destructive">
               <AlertCircle className="h-6 w-6" />
               <p className="text-sm">{error}</p>
-              <Button variant="outline" size="sm" onClick={fetchReleases}>
+              <Button variant="outline" size="sm" onClick={() => fetchReleases()}>
                 {t("changelogRetry")}
               </Button>
             </div>

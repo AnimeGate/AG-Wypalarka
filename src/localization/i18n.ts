@@ -50,6 +50,8 @@ i18n.use(initReactI18next).init({
         changelogNoNotes: "Brak notatek dla tego wydania",
         changelogRetry: "Spróbuj ponownie",
         changelogNoConfig: "Brak konfiguracji GitHub",
+        changelogCached: "Cache ({{time}})",
+        changelogRefresh: "Odśwież",
         // Network Status
         offlineTitle: "Jesteś offline",
         offlineDescription: "Sprawdź połączenie internetowe",
@@ -419,6 +421,8 @@ i18n.use(initReactI18next).init({
         changelogNoNotes: "No release notes available",
         changelogRetry: "Retry",
         changelogNoConfig: "GitHub configuration missing",
+        changelogCached: "Cached ({{time}})",
+        changelogRefresh: "Refresh",
         // Network Status
         offlineTitle: "You are offline",
         offlineDescription: "Check your internet connection",

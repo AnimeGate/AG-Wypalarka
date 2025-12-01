@@ -1,28 +1,30 @@
 import { contextBridge, ipcRenderer } from "electron";
 import { DEBUG_CHANNELS } from "./debug-channels";
 
+type DebugLogLevel =
+  | "info"
+  | "success"
+  | "warn"
+  | "error"
+  | "debug"
+  | "route"
+  | "ipc"
+  | "updater"
+  | "ffmpeg"
+  | "queue"
+  | "file"
+  | "legal"
+  | "perf"
+  | "network"
+  | "state"
+  | "lifecycle";
+
 /**
  * Expose debug logging API to renderer process
  */
 export function exposeDebugContext(): void {
   contextBridge.exposeInMainWorld("debugAPI", {
-    log: (
-      level:
-        | "info"
-        | "success"
-        | "warn"
-        | "error"
-        | "debug"
-        | "route"
-        | "ipc"
-        | "updater"
-        | "ffmpeg"
-        | "queue"
-        | "file"
-        | "legal",
-      message: string,
-      ...args: unknown[]
-    ) => {
+    log: (level: DebugLogLevel, message: string, ...args: unknown[]) => {
       ipcRenderer.send(DEBUG_CHANNELS.LOG, { level, message, args });
     },
 
@@ -72,6 +74,22 @@ export function exposeDebugContext(): void {
 
     legal: (message: string, ...args: unknown[]) => {
       ipcRenderer.send(DEBUG_CHANNELS.LOG, { level: "legal", message, args });
+    },
+
+    perf: (message: string, ...args: unknown[]) => {
+      ipcRenderer.send(DEBUG_CHANNELS.LOG, { level: "perf", message, args });
+    },
+
+    network: (message: string, ...args: unknown[]) => {
+      ipcRenderer.send(DEBUG_CHANNELS.LOG, { level: "network", message, args });
+    },
+
+    state: (message: string, ...args: unknown[]) => {
+      ipcRenderer.send(DEBUG_CHANNELS.LOG, { level: "state", message, args });
+    },
+
+    lifecycle: (message: string, ...args: unknown[]) => {
+      ipcRenderer.send(DEBUG_CHANNELS.LOG, { level: "lifecycle", message, args });
     },
   });
 }
