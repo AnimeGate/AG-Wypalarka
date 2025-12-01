@@ -7,6 +7,14 @@ projekt stosuje [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [1.1.1] - 2025-12-01
+
+### Zmieniono
+
+- Zaktualizowano ikonę aplikacji w celu łatwiejszego rozróniania 
+
+---
+
 ## [1.1.0] - 2025-12-01
 
 ### Dodano
