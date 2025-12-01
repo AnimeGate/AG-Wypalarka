@@ -12,7 +12,7 @@ import { BurnerFileInput, type BurnerFileInputHandle } from "./BurnerFileInput";
 import { BurnerProgressPanel } from "./BurnerProgressPanel";
 import { BurnerQueuePanel } from "./BurnerQueuePanel";
 import { BurnerQueueProgressPanel } from "./BurnerQueueProgressPanel";
-import { BurnerSettingsModal } from "./BurnerSettingsModal";
+import { SettingsModal } from "./settings";
 import { FfmpegDownloadDialog } from "./FfmpegDownloadDialog";
 import { DiskSpaceBar } from "./DiskSpaceBar";
 import { DiskSpaceDialog } from "./DiskSpaceDialog";
@@ -161,7 +161,7 @@ function SubtitleBurnerContent() {
           </div>
 
           <div className="flex items-center gap-2">
-            <BurnerSettingsModal
+            <SettingsModal
               settings={settings}
               onSettingsChange={setSettings}
               disabled={status === "processing" || !ffmpegInstalled}

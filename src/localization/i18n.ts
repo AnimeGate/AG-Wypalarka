@@ -140,6 +140,33 @@ i18n.use(initReactI18next).init({
         burnerEncodingSettingsDesc: "Dostosuj jakość i wydajność",
         burnerAdvancedSettings: "Zaawansowane ustawienia",
 
+        // Settings Tabs
+        settingsTabGeneral: "Ogólne",
+        settingsTabProfile: "Profile",
+        settingsTabAdvanced: "Zaawansowane",
+
+        // Slider labels
+        settingsCqBest: "najlepsza",
+        settingsCqGood: "dobra",
+        settingsCqWorst: "najgorsza",
+        settingsFrames: "klatek",
+        settingsAqOptions: "Adaptacyjna kwantyzacja",
+
+        // Output defaults
+        saveLocation: "Miejsce zapisu",
+        saveSameAsInput: "Jak plik źródłowy",
+        saveInputSubfolder: "Folder 'wypalone' obok pliku",
+        saveCustomFolder: "Własny folder",
+        chooseFolder: "Folder docelowy",
+        noFolderSelected: "Nie wybrano",
+        choose: "Wybierz",
+        filenamePrefix: "Prefiks nazwy pliku",
+        saveOutputDefaults: "Zapisz domyślne",
+        saving: "Zapisywanie...",
+        saved: "Zapisano",
+        saveFailed: "Błąd zapisu",
+        bitrateNotUsedCQVBRHQ: "Bitrate nie jest używany w trybie CQ/VBR_HQ",
+
         // Simple Profiles
         burnerProfile: "Profil",
         burnerProfileCustom: "Własny",
@@ -431,6 +458,33 @@ i18n.use(initReactI18next).init({
         burnerEncodingSettings: "Encoding Settings",
         burnerEncodingSettingsDesc: "Adjust quality and performance",
         burnerAdvancedSettings: "Advanced Settings",
+
+        // Settings Tabs
+        settingsTabGeneral: "General",
+        settingsTabProfile: "Profile",
+        settingsTabAdvanced: "Advanced",
+
+        // Slider labels
+        settingsCqBest: "best",
+        settingsCqGood: "good",
+        settingsCqWorst: "worst",
+        settingsFrames: "frames",
+        settingsAqOptions: "Adaptive Quantization",
+
+        // Output defaults
+        saveLocation: "Save location",
+        saveSameAsInput: "Same as input",
+        saveInputSubfolder: "'vypalone' subfolder",
+        saveCustomFolder: "Custom folder",
+        chooseFolder: "Target folder",
+        noFolderSelected: "Not selected",
+        choose: "Choose",
+        filenamePrefix: "Filename prefix",
+        saveOutputDefaults: "Save defaults",
+        saving: "Saving...",
+        saved: "Saved",
+        saveFailed: "Save failed",
+        bitrateNotUsedCQVBRHQ: "Bitrate is not used in CQ/VBR_HQ mode",
 
         // Simple Profiles
         burnerProfile: "Profile",
