@@ -1,70 +1,101 @@
-# Changelog
+# Historia zmian
 
-All notable changes to this project will be documented in this file.
+Wszystkie istotne zmiany w projekcie będą dokumentowane w tym pliku.
 
-The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
-and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+Format oparty na [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
+projekt stosuje [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
 ## [1.0.0] - 2025-12-01
 
-### Added
+### Wypalarka przeniesiona do osobnej aplikacji
 
-**Core Features**
-- Professional video subtitle burning - embed ASS subtitles directly into video files
-- Single file mode with intuitive file input panel and encoding preview
-- Queue mode for batch processing multiple video/subtitle pairs
-- Drag-and-drop support with automatic file pairing by name matching
+Funkcjonalność wypalania napisów ASS do plików wideo została przeniesiona z **AG-SubEditor** do dedykowanej aplikacji **AG-Wypalarka**.
 
-**Encoding & Processing**
-- FFmpeg integration with automatic download and installation
-- NVIDIA NVENC GPU acceleration support for faster encoding
-- Multiple quality modes: Bitrate-based (VBR) and Constant Quality (CQ)
-- Configurable bitrate presets (2-20 Mbps) with custom option
-- Real-time progress tracking with ETA, FPS, speed, and bitrate stats
-- Collapsible FFmpeg logs for monitoring encoding process
+### Dlaczego ta zmiana?
 
-**Queue System**
-- Batch processing with queue management
-- Auto-pairing of video and subtitle files by filename
-- Unpaired files dialog for manual subtitle selection
-- Pause/resume queue functionality
-- Queue statistics (pending, processing, completed, errors)
+Przeniesienie Wypalarki do osobnej aplikacji pozwala na:
+- Lepsze skupienie AG-SubEditor na edycji napisów
+- Niezależne aktualizacje wypalarki
+- Mniejszy rozmiar instalatora AG-SubEditor
+- Łatwiejsze utrzymanie reszty projektów
 
-**User Interface**
-- Progress ring visualization with percentage and ETA
-- Stats bar showing real-time encoding metrics
-- Disk space monitoring with warning dialogs
-- Output file conflict detection with auto-rename option
-- Settings modal with encoding configuration
-- GPU detection and status display
+### Dodano
+
+**Podstawowe funkcje**
+- Profesjonalne wypalanie napisów ASS do plików wideo
+- Tryb pojedynczego pliku z intuicyjnym interfejsem
+- Tryb kolejki do przetwarzania wielu plików
+- Przeciągnij i upuść z automatycznym parowaniem plików po nazwie
+
+**Kodowanie i przetwarzanie**
+- Integracja FFmpeg z automatycznym pobieraniem i instalacją
+- Akceleracja GPU NVIDIA NVENC dla szybszego kodowania
+- Tryby jakości: Bitrate (VBR) i Stała Jakość (CQ)
+- Konfigurowalne presety bitrate (2-20 Mbps) z opcją własną
+- Śledzenie postępu w czasie rzeczywistym (ETA, FPS, prędkość, bitrate)
+- Rozwijane logi FFmpeg do monitorowania procesu
+
+**System kolejki**
+- Przetwarzanie z zarządzaniem kolejką
+- Automatyczne parowanie plików wideo i napisów po nazwie
+- Dialog dla niesparowanych plików do ręcznego wyboru napisów
+- Funkcja wstrzymania/wznowienia kolejki ( kodowanie pliku od 0 ffmep nie wspiera wstrzymywania )
+- Statystyki kolejki (oczekujące, przetwarzane, ukończone, błędy)
+
+**Interfejs użytkownika**
+- Pierścień postępu z procentem i ETA
+- Pasek statystyk z metrykami kodowania w czasie rzeczywistym
+- Monitorowanie miejsca na dysku z ostrzeżeniami
+- Wykrywanie konfliktów plików wyjściowych z automatycznym przemianowaniem
+- Modal ustawień z konfiguracją kodowania
+- Wykrywanie i wyświetlanie statusu GPU
 
 **System**
-- Auto-update system via GitHub Releases
-- Polish and English localization
-- Light/dark/system theme support
-- Debug mode with separate console window
-- Comprehensive error handling and recovery
-
-### Technical Details
-- Built with Electron, React 19, TypeScript, and Tailwind CSS 4
-- Uses shadcn-ui component library
-- TanStack Router for navigation
-- electron-builder with NSIS installer
+- Automatyczne aktualizacje przez GitHub Releases
+- Polskie i angielskie tłumaczenie
+- Wsparcie motywów jasny/ciemny/systemowy
+- Tryb debugowania z osobnym oknem konsoli
+- Kompleksowa obsługa błędów
 
 ---
 
-## GitHub Release Publishing
+## Szablon notatek wydania
 
-When publishing a new release on GitHub:
+Podczas tworzenia wydań na GitHub, użyj poniższego formatu dla notatek. Będą one wyświetlane w oknie dialogowym aktualizacji.
 
-1. Go to your repository's **Releases** page
-2. Click **Draft a new release**
-3. Create a new tag (e.g., `v1.0.0`)
-4. Set the release title (e.g., `v1.0.0 - Initial Release`)
-5. Paste your release notes in the description
-6. Attach the built installers (from `release/` folder)
-7. Click **Publish release**
+### Przykład (do skopiowania)
 
-The auto-updater will automatically detect the new release and show the update dialog to users.
+```markdown
+## Co nowego w v1.1.0
+
+### Nowe funkcje
+- **Nowa funkcja** - Opis nowej funkcjonalności
+- **Skróty klawiszowe** - Naciśnij `Ctrl+K` aby otworzyć paletę komend
+
+### Ulepszenia
+- Szybszy czas uruchamiania
+- Lepsze zarządzanie pamięcią
+
+### Poprawki błędów
+- Naprawiono awarię przy otwieraniu plików ze znakami specjalnymi
+- Rozwiązano problem z zapisywaniem ustawień
+
+### Uwagi
+Ta aktualizacja wymaga ponownego uruchomienia.
+```
+
+---
+
+## Publikowanie wydania na GitHub
+
+1. Przejdź do strony **Releases** repozytorium
+2. Kliknij **Draft a new release**
+3. Utwórz nowy tag (np. `v1.0.0`)
+4. Ustaw tytuł wydania (np. `v1.0.0 - Pierwsza wersja`)
+5. Wklej notatki wydania w opisie
+6. Dołącz zbudowane instalatory (z folderu `release/`)
+7. Kliknij **Publish release**
+
+Auto-updater automatycznie wykryje nowe wydanie i wyświetli okno aktualizacji użytkownikom.
