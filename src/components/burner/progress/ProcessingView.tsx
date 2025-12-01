@@ -58,26 +58,26 @@ export function ProcessingView({
 
   return (
     <Card className={cn("flex h-full min-w-0 flex-col overflow-hidden", className)}>
-      <CardContent className="flex min-w-0 flex-1 flex-col items-center justify-center gap-6 overflow-hidden p-6">
-        {/* Header with Cancel Button */}
-        <div className="flex w-full items-center justify-end">
-          {onCancel && (
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button variant="destructive" size="sm" onClick={onCancel}>
-                    <StopCircle className="mr-2 h-4 w-4" />
-                    {t("progressCancel", { defaultValue: "Anuluj" })}
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>
-                  {t("burnerCancel", { defaultValue: "Anuluj proces" })}
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-          )}
+      {/* Sticky Cancel Button */}
+      {onCancel && (
+        <div className="bg-card/80 sticky top-0 z-10 flex w-full items-center justify-end px-6 pt-4 backdrop-blur-sm">
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button variant="destructive" size="sm" onClick={onCancel}>
+                  <StopCircle className="mr-2 h-4 w-4" />
+                  {t("progressCancel", { defaultValue: "Anuluj" })}
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                {t("burnerCancel", { defaultValue: "Anuluj proces" })}
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
         </div>
+      )}
 
+      <CardContent className="flex min-w-0 flex-1 flex-col items-center gap-6 overflow-y-auto p-6">
         {/* Progress Ring - Centered */}
         <div className="flex flex-col items-center gap-4">
           <ProgressRing
