@@ -183,7 +183,7 @@ Components will be added to `src/components/ui/`.
 pnpm start
 
 # Debug mode (opens debug console)
-pnpm run start:debug
+pnpm run dev
 ```
 
 ### Building
@@ -239,7 +239,7 @@ Enable debug mode to access:
 **Enable:**
 ```bash
 # Development
-pnpm run start:debug
+pnpm run dev
 
 # Production
 your-app.exe --debug

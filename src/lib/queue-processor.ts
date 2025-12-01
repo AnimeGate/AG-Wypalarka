@@ -1,4 +1,4 @@
-import { FFmpegProcessor, FFmpegProgress, EncodingSettings } from "./ffmpeg-processor";
+import { FFmpegProcessor, FFmpegProgress, EncodingSettings } from "./ffmpeg";
 import { debugLog } from "@/helpers/debug-mode";
 
 export interface QueueItem {

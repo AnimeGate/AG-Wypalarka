@@ -94,7 +94,7 @@ interface FFmpegProgress {
   bitrate: string;
   speed: string;
   percentage: number;
-  eta?: string;
+  eta: string | null;
 }
 
 type LogType = "info" | "success" | "warning" | "error" | "debug" | "metadata";

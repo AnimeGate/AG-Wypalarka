@@ -20,8 +20,8 @@ AG-Wypalarka is a professional video subtitle burning tool built with Electron, 
 
 ### Development
 - `pnpm start` - Start the app in development mode with Vite hot reload
-- `pnpm run start:debug` - Start with debug mode (opens debug console window)
-- `pnpm run start:debug:win` - Windows-specific debug mode command
+- `pnpm run dev` - Start with debug mode (opens debug console window)
+- `pnpm run dev:win` - Windows-specific debug mode command
 - `pnpm run lint` - Run ESLint
 - `pnpm run format` - Check formatting with Prettier
 - `pnpm run format:write` - Format all code
@@ -73,7 +73,7 @@ Single source of truth for all app metadata:
 ### Application Structure
 
 **Main Components (src/components/burner/):**
-- `SubtitleBurner.tsx` - Root component managing state and processing
+- `SubtitleBurner.tsx` - Root component (uses contexts, ~340 lines)
 - `BurnerFileInput.tsx` - Video/subtitle file selection
 - `BurnerProgressPanel.tsx` - Single file progress display
 - `BurnerQueuePanel.tsx` - Queue list management
@@ -90,8 +90,30 @@ Single source of truth for all app metadata:
 - `UnpairedFilesDialog.tsx` - Unpaired files warning
 - `FfmpegDownloadDialog.tsx` - FFmpeg installation dialog
 
+**React Contexts (src/contexts/burner/):**
+- `FFmpegContext.tsx` - FFmpeg installation state, process status, logs, progress
+- `EncodingSettingsContext.tsx` - Encoding settings, GPU availability, bitrate calculation
+- `QueueContext.tsx` - Queue state, items, stats, and queue operations
+- `DialogContext.tsx` - All dialog open/close states and handlers
+- `BurnerProviders.tsx` - Combined provider wrapper (order: FFmpeg → Settings → Queue → Dialog)
+- `index.ts` - Barrel export for all contexts
+
+**Custom Hooks (src/hooks/burner/):**
+- `useDiskSpacePaths.ts` - Track video/output paths for DiskSpaceBar
+- `useProcessWithDiskCheck.ts` - Start single file process with disk validation
+- `useQueueWithChecks.ts` - Start queue with conflict and disk space checks
+- `index.ts` - Barrel export
+
 **Core Libraries (src/lib/):**
-- `ffmpeg-processor.ts` - Main FFmpeg executor
+
+FFmpeg Module (`src/lib/ffmpeg/`):
+- `ffmpeg-processor.ts` - Main FFmpegProcessor class
+- `ffmpeg-path-utils.ts` - Path escaping, validation, normalization
+- `ffmpeg-output-parser.ts` - Parse FFmpeg output (time, duration, ETA, bitrate)
+- `ffmpeg-settings.ts` - EncodingSettings interface and normalization
+- `index.ts` - Barrel export
+
+Other Libraries:
 - `ffmpeg-downloader.ts` - FFmpeg auto-installer from GitHub
 - `queue-processor.ts` - Batch processing manager
 - `disk-space.ts` - Cross-platform disk space calculator
@@ -101,11 +123,26 @@ Single source of truth for all app metadata:
 
 IPC is centralized in `src/helpers/ipc/`:
 
+**FFmpeg IPC Handler Structure (`src/helpers/ipc/ffmpeg/`):**
+```
+ffmpeg/
+├── handlers/                 # Modular handlers (split for maintainability)
+│   ├── file-handlers.ts      # File selection dialogs
+│   ├── process-handlers.ts   # FFmpeg process control (start, cancel, GPU)
+│   ├── download-handlers.ts  # FFmpeg download management
+│   ├── disk-space-handlers.ts    # Disk space checks
+│   ├── queue-handlers.ts     # Queue management operations
+│   └── index.ts              # Barrel export
+├── ffmpeg-channels.ts        # Channel name constants
+├── ffmpeg-context.ts         # contextBridge exposure to renderer
+└── ffmpeg-listeners.ts       # Main registration (imports from handlers/)
+```
+
 **Pattern for adding new IPC features:**
 1. Create folder: `src/helpers/ipc/feature/`
 2. Add `feature-channels.ts` with channel constants
 3. Add `feature-context.ts` with contextBridge exposure
-4. Add `feature-listeners.ts` with ipcMain handlers
+4. Add `feature-listeners.ts` with ipcMain handlers (or use handlers/ subfolder)
 5. Update `context-exposer.ts` and `listeners-register.ts`
 6. Add TypeScript types to `src/types.d.ts`
 
@@ -206,7 +243,7 @@ Comprehensive debug mode with separate console window:
 - `legal` - Legal/copyright info
 
 **Enable:**
-- Development: `pnpm run start:debug`
+- Development: `pnpm run dev`
 - Production: `AG-Wypalarka.exe --debug`
 
 **Usage (Main Process):**
@@ -328,13 +365,48 @@ If build fails with "process cannot access the file":
 ### Add FFmpeg Preset
 1. Update `BurnerSettings.tsx` types
 2. Add UI controls in `BurnerSettingsModal.tsx`
-3. Update `ffmpeg-processor.ts` to handle new preset
-4. Add translation keys in `i18n.ts`
+3. Update `src/lib/ffmpeg/ffmpeg-settings.ts` for normalization
+4. Update `src/lib/ffmpeg/ffmpeg-processor.ts` to handle new preset
+5. Add translation keys in `i18n.ts`
 
 ### Add New Queue Feature
 1. Update `queue-processor.ts` logic
 2. Add IPC channel in `ffmpeg-channels.ts`
-3. Add handler in `ffmpeg-listeners.ts`
+3. Add handler in `src/helpers/ipc/ffmpeg/handlers/queue-handlers.ts`
 4. Expose in `ffmpeg-context.ts`
 5. Update `types.d.ts`
-6. Update UI components
+6. Update `QueueContext.tsx` if state management needed
+7. Update UI components
+
+### Using React Contexts
+The burner feature uses React Context for state management. To access state:
+
+```typescript
+import { useFFmpeg, useEncodingSettings, useQueue, useDialogs } from "@/contexts/burner";
+
+function MyComponent() {
+  // FFmpeg state
+  const { status, logs, progress, startProcess, cancelProcess } = useFFmpeg();
+
+  // Encoding settings
+  const { settings, setSettings, gpuAvailable, getBitrate } = useEncodingSettings();
+
+  // Queue operations
+  const { queue, stats, addItems, removeItem, isProcessing } = useQueue();
+
+  // Dialog states
+  const { diskSpaceDialogOpen, checkDiskSpaceForSingle } = useDialogs();
+}
+```
+
+**Provider Order (in BurnerProviders.tsx):**
+1. `FFmpegProvider` - Base provider, no dependencies
+2. `EncodingSettingsProvider` - Uses `useFFmpeg()` for `ffmpegInstalled`
+3. `QueueProvider` - Uses encoding settings
+4. `DialogProvider` - Uses all above contexts
+
+### Add New Context State
+1. Identify which context should own the state
+2. Add state and actions to the appropriate context
+3. Update the context's return value
+4. If cross-context dependency needed, ensure correct provider order

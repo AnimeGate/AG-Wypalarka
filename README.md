@@ -66,7 +66,7 @@ pnpm start
 pnpm start
 
 # Start with debug console
-pnpm run start:debug
+pnpm run dev
 
 # Run tests
 pnpm test
@@ -114,23 +114,58 @@ pnpm run publish
 AG-Wypalarka/
 ├── src/
 │   ├── components/
-│   │   ├── subtitle-burner/      # Main application components
-│   │   │   ├── SubtitleBurner.tsx        # Main component with state
-│   │   │   ├── BurnerProgressPanel.tsx   # Progress display
-│   │   │   ├── BurnerQueuePanel.tsx      # Queue management
+│   │   ├── burner/               # Main application components
+│   │   │   ├── SubtitleBurner.tsx        # Main component (uses contexts)
 │   │   │   ├── BurnerFileInput.tsx       # File selection
-│   │   │   └── BurnerSettingsModal.tsx   # Encoding settings
+│   │   │   ├── BurnerProgressPanel.tsx   # Single file progress
+│   │   │   ├── BurnerQueuePanel.tsx      # Queue list management
+│   │   │   ├── BurnerQueueProgressPanel.tsx  # Queue progress display
+│   │   │   ├── BurnerSettingsModal.tsx   # Encoding settings dialog
+│   │   │   ├── DiskSpaceBar.tsx          # Disk space footer
+│   │   │   └── ...                       # Other dialogs and components
 │   │   └── ui/                   # shadcn-ui components
 │   │
-│   ├── lib/                      # Core libraries
-│   │   ├── ffmpeg-processor.ts   # FFmpeg execution
-│   │   ├── ffmpeg-downloader.ts  # FFmpeg auto-install
-│   │   ├── queue-processor.ts    # Batch processing
-│   │   └── disk-space.ts         # Disk space utilities
+│   ├── contexts/
+│   │   └── burner/               # React Contexts for state management
+│   │       ├── FFmpegContext.tsx         # FFmpeg state, logs, progress
+│   │       ├── EncodingSettingsContext.tsx   # Settings and GPU info
+│   │       ├── QueueContext.tsx          # Queue state and operations
+│   │       ├── DialogContext.tsx         # All dialog states
+│   │       ├── BurnerProviders.tsx       # Combined provider wrapper
+│   │       └── index.ts                  # Barrel export
+│   │
+│   ├── hooks/
+│   │   └── burner/               # Custom React hooks
+│   │       ├── useDiskSpacePaths.ts      # Track paths for disk bar
+│   │       ├── useProcessWithDiskCheck.ts    # Process with disk validation
+│   │       ├── useQueueWithChecks.ts     # Queue with conflict checks
+│   │       └── index.ts                  # Barrel export
+│   │
+│   ├── lib/
+│   │   ├── ffmpeg/               # FFmpeg library (modular)
+│   │   │   ├── ffmpeg-processor.ts       # Main FFmpeg executor
+│   │   │   ├── ffmpeg-path-utils.ts      # Path escaping utilities
+│   │   │   ├── ffmpeg-output-parser.ts   # Output parsing utilities
+│   │   │   ├── ffmpeg-settings.ts        # Settings normalization
+│   │   │   └── index.ts                  # Barrel export
+│   │   ├── ffmpeg-downloader.ts  # FFmpeg auto-installer
+│   │   ├── queue-processor.ts    # Batch processing manager
+│   │   ├── disk-space.ts         # Disk space utilities
+│   │   └── drop-helpers.ts       # File drag-drop utilities
 │   │
 │   ├── helpers/
 │   │   └── ipc/
-│   │       └── ffmpeg/           # FFmpeg IPC handlers
+│   │       └── ffmpeg/
+│   │           ├── handlers/     # Modular IPC handlers
+│   │           │   ├── file-handlers.ts      # File selection dialogs
+│   │           │   ├── process-handlers.ts   # FFmpeg process control
+│   │           │   ├── download-handlers.ts  # FFmpeg download
+│   │           │   ├── disk-space-handlers.ts    # Disk space checks
+│   │           │   ├── queue-handlers.ts     # Queue management
+│   │           │   └── index.ts              # Barrel export
+│   │           ├── ffmpeg-channels.ts    # Channel constants
+│   │           ├── ffmpeg-context.ts     # Context exposure
+│   │           └── ffmpeg-listeners.ts   # Handler registration
 │   │
 │   ├── config/
 │   │   └── app.config.ts         # App configuration
@@ -150,7 +185,7 @@ AG-Wypalarka/
 | Script | Description |
 |--------|-------------|
 | `pnpm start` | Start development server |
-| `pnpm run start:debug` | Start with debug console |
+| `pnpm run dev` | Start with debug console |
 | `pnpm run build` | Build for production |
 | `pnpm run dist:dir` | Build and package (no installer) |
 | `pnpm run dist` | Build with installer |
