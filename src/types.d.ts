@@ -21,7 +21,19 @@ interface ElectronWindow {
 
 interface DebugAPI {
   log: (
-    level: "info" | "success" | "warn" | "error" | "debug" | "route" | "ipc" | "updater",
+    level:
+      | "info"
+      | "success"
+      | "warn"
+      | "error"
+      | "debug"
+      | "route"
+      | "ipc"
+      | "updater"
+      | "ffmpeg"
+      | "queue"
+      | "file"
+      | "legal",
     message: string,
     ...args: unknown[]
   ) => void;
@@ -33,6 +45,10 @@ interface DebugAPI {
   route: (message: string, ...args: unknown[]) => void;
   ipc: (message: string, ...args: unknown[]) => void;
   updater: (message: string, ...args: unknown[]) => void;
+  ffmpeg: (message: string, ...args: unknown[]) => void;
+  queue: (message: string, ...args: unknown[]) => void;
+  file: (message: string, ...args: unknown[]) => void;
+  legal: (message: string, ...args: unknown[]) => void;
 }
 
 interface UpdaterAPI {
@@ -71,9 +87,187 @@ interface UpdaterAPI {
   onUpdateError: (callback: (error: string) => void) => () => void;
 }
 
+interface FFmpegProgress {
+  frame: number;
+  fps: number;
+  time: string;
+  bitrate: string;
+  speed: string;
+  percentage: number;
+  eta?: string;
+}
+
+type LogType = "info" | "success" | "warning" | "error" | "debug" | "metadata";
+
+interface FFmpegDownloadProgress {
+  status?: "idle" | "downloading" | "extracting" | "complete" | "error";
+  percentage: number;
+  downloadedBytes: number;
+  totalBytes: number;
+}
+
+interface FileAPI {
+  getPathForFile: (file: File) => string;
+}
+
+interface ElectronAPI {
+  invoke: <T = unknown>(channel: string, ...args: unknown[]) => Promise<T>;
+  send: (channel: string, ...args: unknown[]) => void;
+  on: (channel: string, callback: (...args: unknown[]) => void) => () => void;
+}
+
+interface FFmpegStartParams {
+  videoPath: string;
+  subtitlePath: string;
+  outputPath: string;
+  settings?: {
+    bitrate: string;
+    useHardwareAccel?: boolean;
+    gpuEncode?: boolean;
+    codec?: "h264";
+    preset?: "p1" | "p2" | "p3" | "p4" | "p5" | "p6" | "p7";
+    qualityMode?: "cq" | "vbr" | "vbr_hq" | "cbr";
+    cq?: number;
+    spatialAQ?: boolean;
+    temporalAQ?: boolean;
+    rcLookahead?: number;
+    scaleWidth?: number;
+    scaleHeight?: number;
+  };
+}
+
+interface DiskSpaceCheckResult {
+  sufficient: boolean;
+  available: number;
+  required: number;
+  availableFormatted: string;
+  requiredFormatted: string;
+  driveLetter: string;
+}
+
+interface QueueItem {
+  id: string;
+  videoPath: string;
+  videoName: string;
+  subtitlePath: string;
+  subtitleName: string;
+  outputPath: string;
+  status: "pending" | "processing" | "completed" | "error" | "cancelled";
+  progress: FFmpegProgress | null;
+  error?: string;
+  logs: Array<{
+    log: string;
+    type: "info" | "success" | "warning" | "error" | "debug" | "metadata";
+  }>;
+}
+
+interface QueueStats {
+  total: number;
+  pending: number;
+  processing: number;
+  completed: number;
+  error: number;
+  cancelled: number;
+}
+
+interface FfmpegAPI {
+  // File selection
+  selectVideoFile: () => Promise<{ filePath: string; fileName: string } | null>;
+  selectSubtitleFile: () => Promise<{ filePath: string; fileName: string } | null>;
+  selectOutputPath: (defaultName: string) => Promise<string | null>;
+  getDefaultOutputPath: (
+    videoPath: string,
+    override?: { prefix?: string; directory?: string | null }
+  ) => Promise<string>;
+
+  // Process control
+  startProcess: (params: FFmpegStartParams) => Promise<{ success: boolean }>;
+  cancelProcess: () => Promise<{ success: boolean; message?: string }>;
+  checkGpu: () => Promise<{ available: boolean; info?: string }>;
+  openOutputFolder: (filePath: string) => Promise<{ success: boolean; error?: string }>;
+
+  // Output conflict detection
+  checkOutputExists: (outputPath: string) => Promise<boolean>;
+  resolveOutputConflict: (outputPath: string) => Promise<string>;
+
+  // FFmpeg Download
+  checkInstalled: () => Promise<{ installed: boolean }>;
+  startDownload: () => Promise<{ success: boolean }>;
+  onDownloadProgress: (
+    callback: (progress: FFmpegDownloadProgress) => void
+  ) => () => void;
+  onDownloadComplete: (callback: () => void) => () => void;
+  onDownloadError: (callback: (error: string) => void) => () => void;
+
+  // Disk Space Check
+  getDiskSpace: (targetPath: string) => Promise<{
+    available: number;
+    total: number;
+    driveLetter: string;
+  }>;
+  getVideoDuration: (videoPath: string) => Promise<number>;
+  checkDiskSpace: (
+    outputPath: string,
+    videoPath: string,
+    settings: {
+      bitrate?: string;
+      qualityMode?: string;
+      cqValue?: number;
+    }
+  ) => Promise<DiskSpaceCheckResult>;
+
+  // Event listeners
+  onProgress: (callback: (progress: FFmpegProgress) => void) => () => void;
+  onLog: (callback: (data: { log: string; type: string }) => void) => () => void;
+  onComplete: (callback: (outputPath: string) => void) => () => void;
+  onError: (callback: (error: string) => void) => () => void;
+
+  // Queue Management
+  queueAddItem: (item: Omit<QueueItem, "id" | "status" | "progress" | "logs">) => Promise<{
+    success: boolean;
+    id: string;
+  }>;
+  queueAddItems: (
+    items: Array<Omit<QueueItem, "id" | "status" | "progress" | "logs">>
+  ) => Promise<{ success: boolean; ids: string[] }>;
+  queueRemoveItem: (id: string) => Promise<{ success: boolean; message?: string }>;
+  queueClear: () => Promise<{ success: boolean; message?: string }>;
+  queueReorder: (fromIndex: number, toIndex: number) => Promise<{ success: boolean; message?: string }>;
+  queueStart: () => Promise<{ success: boolean; message?: string }>;
+  queuePause: () => Promise<{ success: boolean; message?: string }>;
+  queueResume: () => Promise<{ success: boolean; message?: string }>;
+  queueGetAll: () => Promise<{ queue: QueueItem[] }>;
+  queueGetStats: () => Promise<QueueStats>;
+  queueUpdateSettings: (settings: FFmpegStartParams["settings"]) => Promise<{ success: boolean }>;
+  queueSelectFiles: () => Promise<{
+    success: boolean;
+    files: Array<{ filePath: string; fileName: string }>;
+  }>;
+  queueUpdateItemOutput: (
+    itemId: string,
+    newOutputPath: string
+  ) => Promise<{ success: boolean; message?: string }>;
+
+  // Queue Event Listeners
+  onQueueUpdate: (callback: (queue: QueueItem[]) => void) => () => void;
+  onQueueItemUpdate: (callback: (item: QueueItem) => void) => () => void;
+  onQueueItemProgress: (
+    callback: (data: { itemId: string; progress: FFmpegProgress }) => void
+  ) => () => void;
+  onQueueItemLog: (
+    callback: (data: { itemId: string; log: string; type: string }) => void
+  ) => () => void;
+  onQueueItemComplete: (callback: (data: { itemId: string; outputPath: string }) => void) => () => void;
+  onQueueItemError: (callback: (data: { itemId: string; error: string }) => void) => () => void;
+  onQueueComplete: (callback: () => void) => () => void;
+}
+
 declare interface Window {
   themeMode: ThemeModeContext;
   electronWindow: ElectronWindow;
   debugAPI: DebugAPI;
   updaterAPI: UpdaterAPI;
+  ffmpegAPI: FfmpegAPI;
+  fileAPI: FileAPI;
+  electronAPI: ElectronAPI;
 }
