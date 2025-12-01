@@ -59,7 +59,7 @@ i18n.use(initReactI18next).init({
         // ===== BURNER TRANSLATIONS =====
         // Header
         burnerTitle: "Wypalanie napisów",
-        burnerSubtitle: "Osadź napisy ASS bezpośrednio w pliku wideo",
+        burnerSubtitle: "Wypal napisy ASS do wideo",
 
         // Modes
         burnerSingleMode: "Pojedynczy plik",

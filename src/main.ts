@@ -36,12 +36,18 @@ function createWindow() {
   debugLog.info(`Window state: ${windowState.width}x${windowState.height} at (${windowState.x}, ${windowState.y})${windowState.isMaximized ? ' [maximized]' : ''}`);
 
   const preload = path.join(__dirname, "preload.js");
+  // In development, icon is relative to project root; in production, it's in resources
+  const iconPath = inDevelopment
+    ? path.join(process.cwd(), "src/assets/icon.ico")
+    : path.join(__dirname, "../src/assets/icon.ico");
+
   const mainWindow = new BrowserWindow({
     x: windowState.x,
     y: windowState.y,
     width: windowState.width,
     height: windowState.height,
     title: MAIN_WINDOW.title,
+    icon: iconPath,
     webPreferences: {
       devTools: inDevelopment || debugMode,
       contextIsolation: true,
