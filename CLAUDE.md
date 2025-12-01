@@ -4,25 +4,17 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-This is the **Electron Starter Template** - a production-ready template for building modern Electron applications with React 19, TypeScript, and comprehensive tooling. It serves as a starting point for new Electron projects.
+AG-Wypalarka is a professional video subtitle burning tool built with Electron, React 19, TypeScript, and shadcn-ui. The application allows users to embed ASS subtitle files into video files using FFmpeg, with support for single file and batch queue processing.
 
 **Key Features:**
-- React 19 with Compiler for automatic optimization
-- TypeScript with full type safety across processes
-- shadcn-ui components with Tailwind CSS 4
-- i18next internationalization (Polish/English template)
-- TanStack Router with file-based routing
-- Dark/light/system theme support (with flash prevention)
-- Window state persistence (size, position, maximized state)
-- Custom debug mode with separate console window
-- Auto-updater with custom UI (release notes, download progress, changelog history)
-- Vitest + Playwright testing setup
-- Well-structured IPC communication pattern
-- Type-safe IPC schema with timeout/cancellation support
-- Content Security Policy (CSP) for enhanced security
-- Environment variable validation
-- Toast/notification system (Sonner)
-- Offline detection & handling
+- Single file and batch queue processing modes
+- GPU acceleration (NVIDIA NVENC, Intel QSV, AMD AMF)
+- Advanced encoding settings (quality presets, CQ/VBR/CBR modes)
+- Real-time FFmpeg progress tracking
+- Disk space monitoring with warnings
+- FFmpeg auto-download and installation
+- Polish and English localization
+- Auto-update functionality via GitHub Releases
 
 ## Commands
 
@@ -57,43 +49,57 @@ This is the **Electron Starter Template** - a production-ready template for buil
 
 **Location:** `src/config/app.config.ts`
 
-This is the **single source of truth** for all app metadata:
-- `APP_NAME` - Application display name (used in notifications, taskbar, i18n)
-- `APP_ID` - Unique app identifier (Windows notification ID)
-- `PRODUCT_NAME` - Product name (should match package.json)
-- `MAIN_WINDOW` - Main window configuration (title, width, height)
-- `DEBUG_CONSOLE` - Debug console configuration (title, dimensions, colors)
-- `HTML_TITLE` - HTML page title
-
-**Files that import from config:**
-- `src/main.ts` - Uses APP_NAME, APP_ID, MAIN_WINDOW
-- `src/helpers/debug-mode.ts` - Uses DEBUG_CONSOLE
-- `src/localization/i18n.ts` - Uses APP_NAME for appName translation
-
-**To customize:** Edit `src/config/app.config.ts` first, then update `package.json` to match.
+Single source of truth for all app metadata:
+- `APP_NAME` - "AG-Wypalarka"
+- `APP_ID` - "com.animegate.ag-wypalarka"
+- `GITHUB_CONFIG` - { owner: "AnimeGate", repo: "AG-Wypalarka" }
 
 ### Electron Process Model
 
 1. **Main Process** (`src/main.ts`)
    - Creates and manages BrowserWindow
-   - Persists window state (size, position, maximized) via electron-window-state
    - Registers IPC listeners via `registerListeners()`
-   - Dynamically imports React DevTools in development
    - Initializes auto-updater
-   - Handles app lifecycle
+   - Handles FFmpeg operations
 
 2. **Preload Script** (`src/preload.ts`)
-   - Runs in isolated context
    - Exposes IPC contexts via `exposeContexts()`
    - Uses `contextBridge` for security
 
 3. **Renderer Process** (`src/renderer.ts`)
-   - Entry point for React app
-   - Renders `App.tsx` which provides routing
+   - Renders React app (`App.tsx`)
+   - Main component: `SubtitleBurner` at `src/components/burner/SubtitleBurner.tsx`
+
+### Application Structure
+
+**Main Components (src/components/burner/):**
+- `SubtitleBurner.tsx` - Root component managing state and processing
+- `BurnerFileInput.tsx` - Video/subtitle file selection
+- `BurnerProgressPanel.tsx` - Single file progress display
+- `BurnerQueuePanel.tsx` - Queue list management
+- `BurnerQueueProgressPanel.tsx` - Queue progress display
+- `BurnerSettings.tsx` - Encoding settings types
+- `BurnerSettingsModal.tsx` - Settings dialog
+- `DiskSpaceBar.tsx` - Disk space footer indicator
+- `DiskSpaceDialog.tsx` - Disk space warning (single file)
+- `QueueDiskSpaceDialog.tsx` - Disk space warning (queue)
+- `OutputConflictDialog.tsx` - File overwrite prompt (single)
+- `QueueConflictDialog.tsx` - File overwrite prompt (queue)
+- `AddFilesDialog.tsx` - Add files to queue dialog
+- `BurnerQueueItem.tsx` - Individual queue item component
+- `UnpairedFilesDialog.tsx` - Unpaired files warning
+- `FfmpegDownloadDialog.tsx` - FFmpeg installation dialog
+
+**Core Libraries (src/lib/):**
+- `ffmpeg-processor.ts` - Main FFmpeg executor
+- `ffmpeg-downloader.ts` - FFmpeg auto-installer from GitHub
+- `queue-processor.ts` - Batch processing manager
+- `disk-space.ts` - Cross-platform disk space calculator
+- `drop-helpers.ts` - File drag-drop utilities and auto-pairing
 
 ### IPC Communication Pattern
 
-Centralized IPC structure in `src/helpers/ipc/`:
+IPC is centralized in `src/helpers/ipc/`:
 
 **Pattern for adding new IPC features:**
 1. Create folder: `src/helpers/ipc/feature/`
@@ -103,122 +109,87 @@ Centralized IPC structure in `src/helpers/ipc/`:
 5. Update `context-exposer.ts` and `listeners-register.ts`
 6. Add TypeScript types to `src/types.d.ts`
 
-**Current IPC Features:**
-- `theme/` - Theme management (dark/light/system)
-- `window/` - Window controls (minimize/maximize/close)
-- `debug/` - Debug logging system
-- `updater/` - Auto-updater events and commands
+**FFmpeg IPC Channels (src/helpers/ipc/ffmpeg/):**
 
-### Application Structure
+Single File Processing:
+- `ffmpeg:start` - Start encoding
+- `ffmpeg:cancel` - Cancel encoding
+- `ffmpeg:progress` - Progress event
+- `ffmpeg:log` - Log output event
+- `ffmpeg:complete` - Completion event
+- `ffmpeg:error` - Error event
 
-**Core Components:**
-- `BaseLayout.tsx` - Main layout with title bar and navbar
-- `Navbar.tsx` - Navigation with active route highlighting and changelog button
-- `DragWindowRegion.tsx` - Custom draggable title bar
-- `ToggleTheme.tsx` - Theme switcher component
-- `LangToggle.tsx` - Language switcher component
-- `SettingsModal.tsx` - Application settings UI
-- `UpdateDialog.tsx` - Auto-update notification with release notes and download progress
-- `ChangelogHistoryDialog.tsx` - GitHub releases history viewer
+File Selection:
+- `ffmpeg:selectVideo` - Open video file dialog
+- `ffmpeg:selectSubtitle` - Open subtitle file dialog
+- `ffmpeg:selectOutput` - Save output dialog
+- `ffmpeg:getDefaultOutputPath` - Resolve output path with settings
 
-**Routes:**
-- `/` - Welcome page showing template features
+FFmpeg Management:
+- `ffmpeg:checkInstalled` - Check if FFmpeg exists
+- `ffmpeg:startDownload` - Download FFmpeg
+- `ffmpeg:downloadProgress` - Download progress event
+- `ffmpeg:downloadComplete` - Download done event
+- `ffmpeg:downloadError` - Download error event
+- `ffmpeg:checkGpu` - GPU availability check
 
-### Custom Title Bar
+Disk Space:
+- `ffmpeg:checkDiskSpace` - Check available space
+- `ffmpeg:getDiskSpace` - Get raw disk info
+- `ffmpeg:getVideoDuration` - Get video length for estimation
 
-Uses hidden native title bar with custom window controls:
-- Platform-specific handling (macOS: `hiddenInset`, Windows/Linux: `hidden`)
-- Custom controls via IPC (`src/helpers/ipc/window/`)
-- Draggable region component
+Output Conflict:
+- `ffmpeg:checkOutputExists` - File exists check
+- `ffmpeg:resolveOutputConflict` - Auto-rename with _1, _2, etc.
 
-### Theme System
+Queue Management:
+- `ffmpeg:queue:addItem` - Add single item
+- `ffmpeg:queue:addItems` - Add multiple items
+- `ffmpeg:queue:removeItem` - Remove item
+- `ffmpeg:queue:clear` - Clear entire queue
+- `ffmpeg:queue:reorder` - Reorder items
+- `ffmpeg:queue:start` - Start processing
+- `ffmpeg:queue:pause` - Pause processing
+- `ffmpeg:queue:resume` - Resume processing
+- `ffmpeg:queue:getAll` - Get full queue
+- `ffmpeg:queue:getStats` - Get statistics
+- `ffmpeg:queue:updateSettings` - Update encoding settings
+- `ffmpeg:queue:selectFiles` - Multi-select dialog
+- `ffmpeg:queue:updateItemOutput` - Update output path
+- `ffmpeg:queue:update` - Queue changed event
+- `ffmpeg:queue:itemUpdate` - Item changed event
+- `ffmpeg:queue:itemProgress` - Item progress event
+- `ffmpeg:queue:itemLog` - Item log event
+- `ffmpeg:queue:itemComplete` - Item complete event
+- `ffmpeg:queue:itemError` - Item error event
+- `ffmpeg:queue:complete` - Queue complete event
 
-- Light/dark/system modes
-- Persistent storage via IPC
-- oklch color space (Tailwind CSS 4)
-- Smooth transitions
-- `syncThemeWithLocal()` helper
-- **Flash prevention**: Inline script applies theme before React loads to prevent dark mode flash
+### FFmpeg Configuration
 
-### Internationalization
+**Installation Location:** `%APPDATA%\ag-wypalarka\WYPALANIE\`
 
-i18next with Polish and English:
-- Configuration: `src/localization/i18n.ts`
-- Helper: `updateAppLanguage()` in `language_helpers.ts`
-- Minimal template translations provided
+**Download URL:** `https://github.com/BtbN/FFmpeg-Builds/releases/download/latest/ffmpeg-master-latest-win64-gpl.zip`
 
-### Routing
-
-TanStack Router with memory-based history:
-- File-based routing in `src/routes/`
-- Route tree auto-generated: `src/routeTree.gen.ts` (gitignored)
-- Base layout in `__root.tsx`
-
-### Auto-Update System
-
-electron-updater + NSIS with custom React UI:
-
-**Architecture:**
-- Core: `src/helpers/updater/auto-updater.ts` - electron-updater setup
-- IPC: `src/helpers/ipc/updater/` - channels, context, listeners
-- UI: `src/components/UpdateDialog.tsx` - update notification
-- History: `src/components/ChangelogHistoryDialog.tsx` - all releases viewer
-
-**Features:**
-- Custom update dialog with Markdown release notes
-- User-controlled downloads (`autoDownload: false`)
-- Real-time download progress bar with speed/ETA
-- Changelog history button in navbar (fetches from GitHub API)
-- Checks 3 seconds after start, then hourly
-- Logs to `%APPDATA%\electron-app\logs/main.log`
-
-**Configuration:**
-1. Update `src/config/app.config.ts`:
-   ```typescript
-   export const GITHUB_CONFIG = {
-     owner: "yourusername",
-     repo: "your-repo",
-   };
-   ```
-2. Update `package.json` build.publish section to match
-
-**Testing the Update UI (DevTools console):**
-```javascript
-// Show update available dialog with mock release notes
-window.updaterAPI._testShowUpdate()
-
-// Simulate full download flow (progress bar + completion)
-window.updaterAPI._testSimulateDownload()
+**Encoding Settings Structure:**
+```typescript
+{
+  profile: "1080p" | "720p" | "2160p"
+  qualityPreset: "medium" | "high" | "very_high" | "custom"
+  customBitrate: "1000k" | "2400k" | "4000k"
+  useHardwareAccel: boolean
+  codec: "h264"
+  preset: "p1" | "p2" | "p3" | "p4" | "p5" | "p6" | "p7"
+  qualityMode: "cq" | "vbr" | "vbr_hq" | "cbr"
+  cq: number (19 default)
+  spatialAQ: boolean
+  temporalAQ: boolean
+  rcLookahead: number (20 default)
+}
 ```
-
-**Publishing:**
-1. Bump version in `package.json`
-2. Update `repository.url`, `publish.owner/repo`
-3. Run `pnpm run publish`
-4. Publish draft GitHub release with Markdown release notes
-
-**Release Notes Format:**
-See `docs/CHANGELOG.md` for example format. Supports full Markdown (headers, lists, code, bold, links).
 
 ### Debug Mode System
 
 Comprehensive debug mode with separate console window:
-
-**Components:**
-1. `src/helpers/debug-mode.ts` - Main process debug system
-2. `src/debug-console.html` - Standalone debug UI
-3. `src/helpers/ipc/debug/` - IPC bridge
-4. `src/helpers/debug-logger.ts` - Renderer logger
-
-**Enable:**
-- Development: `pnpm run start:debug`
-- Production: `--debug` flag
-
-**Features:**
-- Separate console window
-- Colored logs by category
-- Auto-open DevTools
-- Export logs
 
 **Log Categories:**
 - `info` - General information
@@ -229,169 +200,141 @@ Comprehensive debug mode with separate console window:
 - `route` - Navigation events
 - `ipc` - IPC communication
 - `updater` - Auto-updater events
+- `ffmpeg` - FFmpeg output (unfiltered)
+- `queue` - Queue operations
+- `file` - File operations
+- `legal` - Legal/copyright info
 
-**Debug Console Features:**
-- Log level filters (show/hide by type)
-- Real-time search with highlighting
-- Auto-scroll toggle with automatic detection
-- Memory usage monitor (heap used/total)
-- Export logs to file
-- Log rotation (max 10,000 entries)
+**Enable:**
+- Development: `pnpm run start:debug`
+- Production: `AG-Wypalarka.exe --debug`
+
+**Usage (Main Process):**
+```typescript
+import { debugLog } from "@/helpers/debug-mode";
+
+debugLog.ffmpeg("Starting encoding with settings...");
+debugLog.queue("Processing item: video.mkv (ID: 12345)");
+debugLog.file("Loading subtitle file: example.ass (1024 bytes)");
+```
+
+**Usage (Renderer):**
+```typescript
+import { debugLog } from "@/helpers/debug-logger";
+
+debugLog.ffmpeg("FFmpeg output line received");
+debugLog.queue("Adding items to queue");
+```
+
+### Theme System
+
+- Light/dark/system modes
+- localStorage persistence via IPC
+- oklch color space (Tailwind CSS 4)
+- `syncThemeWithLocal()` helper
+
+### Internationalization
+
+i18next with Polish and English:
+- Primary: Polish (`pl`)
+- Fallback: English (`en`)
+- Configuration: `src/localization/i18n.ts`
+- Translation namespace: `burner.*` for feature-specific keys
+
+### Routing
+
+TanStack Router with memory-based history:
+- Single route: `/` renders `SubtitleBurner`
+- This is a single-feature app (no navigation menu)
+
+### Auto-Update System
+
+electron-updater + NSIS:
+- Configuration: `src/helpers/updater/auto-updater.ts`
+- Checks 3 seconds after start, then hourly
+- Downloads in background
+- Logs to: `%APPDATA%\ag-wypalarka\logs\main.log`
 
 ### UI Components
 
 - **shadcn-ui**: `src/components/ui/`
-- **Tailwind CSS 4**: Utility-first with oklch colors
+- **Tailwind CSS 4**: Utility-first styling
 - **Lucide React**: Icon library
-- **Geist & Tomorrow fonts**: Custom fonts
+- **Geist Font**: Default sans-serif
+
+### Path Aliases
+
+TypeScript and Vite configured with `@/` alias pointing to `src/`:
+```typescript
+import { debugLog } from "@/helpers/debug-mode";
+import { Button } from "@/components/ui/button";
+```
+
+## Development Notes
 
 ### Build System
 
-Vite + vite-plugin-electron:
 - Single config: `vite.config.mts`
+- Uses `vite-plugin-electron/simple`
 - Main entry: `src/main.ts` → `dist-electron/main.js`
 - Preload: `src/preload.ts` → `dist-electron/preload.js`
-- Renderer: Vite build → `dist/`
 
-### Testing
+### Context Isolation
 
-- **Vitest**: Unit tests with jsdom (`src/tests/unit/`)
-- **Playwright**: E2E tests (`src/tests/e2e/`)
-- **Coverage**: V8 provider
+- Context isolation enabled (`contextIsolation: true`)
+- Always use `contextBridge.exposeInMainWorld()`
+- Never expose Node.js modules directly to renderer
 
-### Security Features
+### React Compiler
 
-**Content Security Policy (CSP)**
-- Location: `src/helpers/security/csp.ts`
-- Applied programmatically via Electron session headers
-- Configured for Vite dev server and production
-- Prevents XSS attacks and unauthorized resource loading
-- Navigation prevention to external URLs
+- Enabled via `babel-plugin-react-compiler`
+- Automatic optimization of components
 
-**Environment Variable Validation**
-- Location: `src/helpers/env-validation.ts`
-- Validates `VITE_DEV_SERVER_URL` and `NODE_ENV` at startup
-- Provides helpful error messages for misconfigurations
-- Helper functions: `isDevelopment()`, `isProduction()`, `getDevServerUrl()`
-- Early validation prevents runtime errors
+### Working with FFmpeg
 
-### IPC Enhancements
+**Process Flow:**
+1. User selects video + subtitle files
+2. App checks FFmpeg installation (auto-downloads if missing)
+3. App checks disk space and output conflicts
+4. FFmpeg process spawned with progress parsing
+5. Real-time updates sent to renderer via IPC
+6. Completion notification with output folder shortcut
 
-**Type-Safe IPC with Advanced Features** (`src/helpers/ipc/ipc-schema.ts`)
+**GPU Acceleration:**
+- Detects NVIDIA, Intel, AMD GPUs
+- Falls back to software encoding (libx264) on failure
+- Preset mapping for different hardware encoders
 
-1. **Basic Type-Safe IPC**:
-   - `typedInvoke<T>(channel, ...args)` - Type-safe invoke
-   - `typedSend<T>(channel, ...args)` - Type-safe send
+### Common Issues
 
-2. **Timeout Support**:
-   ```typescript
-   const theme = await typedInvokeWithTimeout("theme:current", {
-     timeout: 5000
-   });
-   ```
-   - Prevents hanging requests
-   - Configurable timeout (default 10 seconds)
-   - Throws error when timeout is reached
+**File Locking During Builds:**
+If build fails with "process cannot access the file":
+1. Close all AG-Wypalarka instances
+2. Run: `taskkill /F /IM AG-Wypalarka.exe /T`
+3. Wait 2 seconds, rebuild
 
-3. **Cancellable Requests**:
-   ```typescript
-   const request = cancellableInvoke("theme:current");
-   request.promise.then(theme => console.log(theme));
-   request.cancel(); // Cancel if needed
-   ```
-   - Cancel in-flight IPC requests
-   - Useful for component unmounting or user cancellation
+**FFmpeg Not Found:**
+- Check `%APPDATA%\ag-wypalarka\WYPALANIE\` for ffmpeg.exe
+- Use debug mode to see download progress/errors
+- Check internet connection for auto-download
 
-### Toast/Notification System
+**Encoding Fails:**
+- Check GPU compatibility if hardware accel enabled
+- Try disabling GPU acceleration
+- Check debug console for FFmpeg output
 
-**Sonner Integration** (`src/components/ui/sonner.tsx`)
-- Modern toast notifications with Sonner library
-- Automatic theme support (follows app theme)
-- Integrated in `App.tsx`
-- Usage:
-  ```typescript
-  import { toast } from "sonner";
+## Adding New Features
 
-  toast.success("Operation successful");
-  toast.error("Something went wrong");
-  toast.info("Information message");
-  ```
+### Add FFmpeg Preset
+1. Update `BurnerSettings.tsx` types
+2. Add UI controls in `BurnerSettingsModal.tsx`
+3. Update `ffmpeg-processor.ts` to handle new preset
+4. Add translation keys in `i18n.ts`
 
-### Offline Detection
-
-**Network Status Monitoring**
-- Hook: `useOnlineStatus()` (`src/hooks/use-online-status.ts`)
-- Component: `OfflineIndicator` (`src/components/OfflineIndicator.tsx`)
-- Automatic toast notifications when going offline/online
-- Real-time status updates
-- Integrated debug logging for network events
-
-## Customizing the Template
-
-Users should:
-1. **Update `src/config/app.config.ts`** - Single source of truth for app identity
-2. Read `TEMPLATE_SETUP.md` for full customization guide
-3. Update `package.json` metadata to match config values
-4. Replace `src/assets/icon.ico`
-5. Add routes in `src/routes/`
-6. Customize theme in `src/styles/global.css`
-
-**IMPORTANT:** Always start with `src/config/app.config.ts` - it automatically updates window titles, app names, and debug console titles throughout the app.
-
-## Adding shadcn-ui Components
-
-```bash
-npx shadcn@latest add [component-name]
-```
-
-Components added to `src/components/ui/` with config from `components.json`.
-
-## Common Development Tasks
-
-### Add New Route
-
-1. Create `src/routes/page-name.tsx`
-2. Export route with `createFileRoute()`
-3. Add nav link in `Navbar.tsx` if needed
-
-### Add New IPC Channel
-
-1. Create `src/helpers/ipc/feature/` folder
-2. Add channels, context, and listeners files
-3. Register in `context-exposer.ts` and `listeners-register.ts`
-4. Update `src/types.d.ts`
-
-### Add Translation Key
-
-1. Edit `src/localization/i18n.ts`
-2. Add key to both `pl` and `en` translations
-3. Use with `const { t } = useTranslation(); t('key')`
-
-### Add Debug Log Category
-
-1. Update `src/types.d.ts` DebugAPI interface
-2. Update `src/helpers/debug-mode.ts` debugLog object
-3. Update `src/helpers/debug-logger.ts`
-4. Update `src/helpers/ipc/debug/debug-context.ts`
-5. Update `src/helpers/ipc/debug/debug-listeners.ts`
-6. Add styling to `src/debug-console.html`
-
-## Important Notes
-
-- **NOT using Electron Forge** - migrated to electron-builder
-- **Context isolation enabled** - Always use contextBridge
-- **No remote module** - Modern IPC only
-- **React Compiler enabled** - Automatic optimization
-- **File locking**: Close app before rebuilding
-
-## Template Philosophy
-
-This template provides:
-- ✅ Complete infrastructure (routing, i18n, theming, IPC)
-- ✅ Best practices and patterns
-- ✅ Minimal example code
-- ✅ Extensive documentation
-- ✅ Ready for customization
-
-**Goal**: Get started quickly with production-quality foundations.
-
+### Add New Queue Feature
+1. Update `queue-processor.ts` logic
+2. Add IPC channel in `ffmpeg-channels.ts`
+3. Add handler in `ffmpeg-listeners.ts`
+4. Expose in `ffmpeg-context.ts`
+5. Update `types.d.ts`
+6. Update UI components
