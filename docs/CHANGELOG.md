@@ -7,6 +7,36 @@ projekt stosuje [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [1.1.0] - 2025-12-01
+
+### Dodano
+
+**Rozszerzona konsola debugowania**
+- 5 zakładek: Console, Performance, State, Network, Timeline
+- REPL / Paleta komend do wykonywania poleceń i JavaScript
+- Zakładka Performance: metryki pamięci, statystyki IPC
+- Zakładka State: inspekcja localStorage, konfiguracji, stanu okna
+- Zakładka Network: monitorowanie żądań fetch w czasie rzeczywistym
+- Zakładka Timeline: wizualizacja wydarzeń w czasie
+- Filtry okien dla wsparcia wielu okien
+- Wbudowane komendy: help, clear, export, filter:X, stats, scroll
+
+**Ulepszenia systemu**
+- Hook useTheme oparty na zdarzeniach (bez pollingu)
+- Cache API GitHub z 15-minutowym TTL
+- Przycisk odświeżania w historii wydań
+- Wskaźnik cache z odliczaniem czasu
+- Rejestr okien dla logowania wielu okien
+- Interceptor sieciowy do śledzenia żądań fetch
+- 4 nowe kategorie logów: perf, network, state, lifecycle
+
+### Poprawiono
+
+- Odstęp między przyciskiem odświeżania a przyciskiem zamknięcia dialogu
+- Pozycjonowanie tooltipa w dialogu historii zmian
+
+---
+
 ## [1.0.0] - 2025-12-01
 
 ### Wypalarka przeniesiona do osobnej aplikacji
