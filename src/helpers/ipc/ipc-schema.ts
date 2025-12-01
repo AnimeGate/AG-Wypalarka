@@ -63,7 +63,6 @@ export function typedInvoke<T extends IPCChannel>(
   channel: T,
   ...args: IPCRequest<T> extends void ? [] : [IPCRequest<T>]
 ): Promise<IPCResponse<T>> {
-  // @ts-expect-error - window.electronAPI is defined in preload
   return window.electronAPI ? window.electronAPI.invoke(channel, ...args) : Promise.reject("IPC not available");
 }
 
@@ -79,7 +78,6 @@ export function typedSend<T extends IPCChannel>(
   channel: T,
   ...args: IPCRequest<T> extends void ? [] : [IPCRequest<T>]
 ): void {
-  // @ts-expect-error - window.electronAPI is defined in preload
   if (window.electronAPI) {
     window.electronAPI.send(channel, ...args);
   }
@@ -104,11 +102,10 @@ export function typedInvokeWithTimeout<T extends IPCChannel>(
 ): Promise<IPCResponse<T>> {
   const { timeout = 10000, args } = options;
 
-  const invokePromise = typedInvoke(
-    channel,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    ...(args !== undefined ? [args as any] : [])
-  );
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const invokeArgs = args !== undefined ? [args] : [];
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const invokePromise = (typedInvoke as any)(channel, ...invokeArgs) as Promise<IPCResponse<T>>;
 
   const timeoutPromise = new Promise<never>((_, reject) => {
     setTimeout(() => {
