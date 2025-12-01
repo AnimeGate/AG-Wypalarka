@@ -3,6 +3,7 @@ import windowStateKeeper from "electron-window-state";
 import registerListeners from "./helpers/ipc/listeners-register";
 import { initializeAutoUpdater } from "./helpers/updater/auto-updater";
 import { initializeDebugMode, debugLog, createDebugConsole } from "./helpers/debug-mode";
+import { windowRegistry } from "./helpers/window-registry";
 import { applyContentSecurityPolicy, preventExternalNavigation } from "./helpers/security/csp";
 import { validateEnvironment, getDevServerUrl, isDevelopment } from "./helpers/env-validation";
 import { APP_NAME, APP_ID, MAIN_WINDOW } from "./config/app.config";
@@ -63,6 +64,9 @@ function createWindow() {
 
   // Register window state management
   windowState.manage(mainWindow);
+
+  // Register window for debug console multi-window support
+  windowRegistry.register(mainWindow, "Main");
 
   registerListeners(mainWindow);
 
