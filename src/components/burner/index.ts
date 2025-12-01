@@ -10,7 +10,9 @@ export { BurnerFileInput, type BurnerFileInputHandle } from "./BurnerFileInput";
 
 // Panels
 export { IdlePanel } from "./IdlePanel";
-export { BurnerQueueProgressPanel } from "./BurnerQueueProgressPanel";
+export { QueueEmptyState } from "./QueueEmptyState";
+export { QueueIdlePanel } from "./QueueIdlePanel";
+export { QueueProcessingPanel } from "./QueueProcessingPanel";
 
 // Queue management
 export { BurnerQueuePanel } from "./BurnerQueuePanel";

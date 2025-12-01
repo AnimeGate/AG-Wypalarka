@@ -350,6 +350,28 @@ i18n.use(initReactI18next).init({
         idleSubtitleFile: "Plik napisów",
         idleOutputLocation: "Lokalizacja",
         idleNotSelected: "Nie wybrano",
+
+        // Queue Empty State
+        queueEmptyTitle: "Przeciągnij pliki tutaj",
+        queueEmptyOr: "lub",
+        queueEmptyAddButton: "Dodaj pliki",
+        queueEmptyHint: "Wideo (.mp4, .mkv) + napisy (.ass)",
+
+        // Queue Idle Panel
+        queueIdleReadyTitle: "Gotowy do przetwarzania",
+        queueIdlePausedTitle: "Wstrzymano",
+        queueIdlePending: "Oczekuje",
+        queueIdleCompleted: "Ukończone",
+        queueIdleErrors: "Błędy",
+        queueIdleStartButton: "Rozpocznij kolejkę",
+        queueIdleResumeButton: "Wznów kolejkę",
+        queueIdleClearButton: "Wyczyść",
+        queueIdleAddMoreButton: "Dodaj więcej",
+
+        // Queue Processing Panel
+        queueProcessingTitle: "Przetwarzanie",
+        queueProcessingPauseButton: "Wstrzymaj",
+        queueProcessingOverall: "Postęp kolejki",
       },
     },
     en: {
@@ -696,6 +718,28 @@ i18n.use(initReactI18next).init({
         idleSubtitleFile: "Subtitle file",
         idleOutputLocation: "Location",
         idleNotSelected: "Not selected",
+
+        // Queue Empty State
+        queueEmptyTitle: "Drop files here",
+        queueEmptyOr: "or",
+        queueEmptyAddButton: "Add files",
+        queueEmptyHint: "Video (.mp4, .mkv) + subtitles (.ass)",
+
+        // Queue Idle Panel
+        queueIdleReadyTitle: "Ready to process",
+        queueIdlePausedTitle: "Paused",
+        queueIdlePending: "Pending",
+        queueIdleCompleted: "Completed",
+        queueIdleErrors: "Errors",
+        queueIdleStartButton: "Start queue",
+        queueIdleResumeButton: "Resume queue",
+        queueIdleClearButton: "Clear",
+        queueIdleAddMoreButton: "Add more",
+
+        // Queue Processing Panel
+        queueProcessingTitle: "Processing",
+        queueProcessingPauseButton: "Pause",
+        queueProcessingOverall: "Queue progress",
       },
     },
   },

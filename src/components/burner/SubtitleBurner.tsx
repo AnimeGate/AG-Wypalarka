@@ -12,7 +12,11 @@ import { BurnerFileInput, type BurnerFileInputHandle, type FileInfo } from "./Bu
 import { IdlePanel } from "./IdlePanel";
 import { EncodingView } from "./progress";
 import { BurnerQueuePanel } from "./BurnerQueuePanel";
-import { BurnerQueueProgressPanel } from "./BurnerQueueProgressPanel";
+import { QueueEmptyState } from "./QueueEmptyState";
+import { QueueIdlePanel } from "./QueueIdlePanel";
+import { QueueProcessingPanel } from "./QueueProcessingPanel";
+import { AddFilesDialog } from "./AddFilesDialog";
+import { UnpairedFilesDialog } from "./UnpairedFilesDialog";
 import { SettingsModal } from "./settings";
 import { FfmpegDownloadDialog } from "./FfmpegDownloadDialog";
 import { DiskSpaceBar } from "./DiskSpaceBar";
@@ -21,6 +25,12 @@ import { QueueDiskSpaceDialog } from "./QueueDiskSpaceDialog";
 import { QueueConflictDialog } from "./QueueConflictDialog";
 import { useTranslation } from "react-i18next";
 import { Flame, Download } from "lucide-react";
+import { debugLog } from "@/helpers/debug-logger";
+import {
+  categorizeDroppedFiles,
+  autoPairFiles,
+  getFileName,
+} from "@/lib/drop-helpers";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 import {
@@ -120,6 +130,20 @@ function SubtitleBurnerContent() {
   const [currentSubtitleFile, setCurrentSubtitleFile] = useState<FileInfo | null>(null);
   const fileInputRef = useRef<BurnerFileInputHandle>(null);
 
+  // Queue UI state
+  const [addFilesDialogOpen, setAddFilesDialogOpen] = useState(false);
+  const [unpairedDialogOpen, setUnpairedDialogOpen] = useState(false);
+  const [unpairedVideos, setUnpairedVideos] = useState<string[]>([]);
+
+  // Compute if queue is paused (was started but now idle with pending items)
+  const isQueuePaused = queue.some(
+    (item) =>
+      item.logs.length > 0 ||
+      item.status === "completed" ||
+      item.status === "error" ||
+      item.status === "cancelled"
+  ) && queueStats.processing === 0 && queueStats.pending > 0 && !isQueueProcessing;
+
   // Handlers
   const handleStartProcess = async (
     videoPath: string,
@@ -143,6 +167,95 @@ function SubtitleBurnerContent() {
     }>
   ) => {
     await addItems(files);
+  };
+
+  // Handle drag-drop on empty queue state
+  const handleQueueDrop = async (files: File[]) => {
+    const { videos, subtitles } = categorizeDroppedFiles(files);
+
+    if (videos.length === 0) {
+      debugLog.file("Only subtitle files dropped, ignoring");
+      return;
+    }
+
+    debugLog.file(
+      `Dropped ${videos.length} video(s) and ${subtitles.length} subtitle(s)`
+    );
+
+    if (subtitles.length === 0) {
+      // Only videos - show unpaired dialog to select subtitle
+      debugLog.file("No subtitles dropped, showing unpaired dialog");
+      setUnpairedVideos(videos);
+      setUnpairedDialogOpen(true);
+      return;
+    }
+
+    // Try to auto-pair
+    const { paired, unpaired } = autoPairFiles(videos, subtitles);
+
+    debugLog.file(
+      `Auto-paired ${paired.length} files, ${unpaired.length} unpaired`
+    );
+
+    // Add paired items to queue
+    if (paired.length > 0) {
+      const items = await Promise.all(
+        paired.map(async ({ video, subtitle }) => {
+          let outputPath: string;
+          try {
+            outputPath = await window.ffmpegAPI.getDefaultOutputPath(video);
+          } catch {
+            const baseName = getFileName(video).replace(/\.[^.]+$/, "");
+            outputPath = `${baseName}_with_subs.mp4`;
+          }
+          return {
+            videoPath: video,
+            videoName: getFileName(video),
+            subtitlePath: subtitle,
+            subtitleName: getFileName(subtitle),
+            outputPath,
+          };
+        })
+      );
+      await addItems(items);
+    }
+
+    // Handle unpaired videos
+    if (unpaired.length > 0) {
+      debugLog.file(`${unpaired.length} videos unpaired, showing unpaired dialog`);
+      setUnpairedVideos(unpaired);
+      setUnpairedDialogOpen(true);
+    }
+  };
+
+  // Handle subtitle selected for unpaired videos
+  const handleUnpairedSubtitleSelected = async (subtitlePath: string) => {
+    debugLog.file(
+      `Applying subtitle ${getFileName(subtitlePath)} to ${unpairedVideos.length} videos`
+    );
+
+    const items = await Promise.all(
+      unpairedVideos.map(async (video) => {
+        let outputPath: string;
+        try {
+          outputPath = await window.ffmpegAPI.getDefaultOutputPath(video);
+        } catch {
+          const baseName = getFileName(video).replace(/\.[^.]+$/, "");
+          outputPath = `${baseName}_with_subs.mp4`;
+        }
+        return {
+          videoPath: video,
+          videoName: getFileName(video),
+          subtitlePath,
+          subtitleName: getFileName(subtitlePath),
+          outputPath,
+        };
+      })
+    );
+
+    await addItems(items);
+    setUnpairedDialogOpen(false);
+    setUnpairedVideos([]);
   };
 
   // Get encoding settings for disk space estimation
@@ -265,32 +378,59 @@ function SubtitleBurnerContent() {
           </TabsContent>
 
           <TabsContent value="queue" className="mt-4 flex min-h-0 flex-1 gap-6">
-            {/* Left Panel - Queue List */}
-            <div className="flex w-96 flex-shrink-0 flex-col">
-              <BurnerQueuePanel
-                queue={queue}
-                stats={queueStats}
-                isProcessing={isQueueProcessing}
-                onAddFiles={handleAddFilesToQueue}
-                onRemoveItem={removeItem}
-                onOpenFolder={openItemFolder}
+            {queue.length === 0 ? (
+              /* Empty queue - full-width drop zone */
+              <QueueEmptyState
+                onDrop={handleQueueDrop}
+                onAddClick={() => setAddFilesDialogOpen(true)}
+                disabled={!ffmpegInstalled}
               />
-            </div>
-
-            {/* Right Panel - Progress */}
-            <div className="min-w-0 flex-1">
-              <BurnerQueueProgressPanel
-                currentItem={getCurrentItem()}
-                stats={queueStats}
-                queue={queue}
-                isProcessing={isQueueProcessing}
-                onAddFiles={handleAddFilesToQueue}
-                onStart={startQueueWithChecks}
-                onPause={pauseQueue}
-                onResume={resumeQueueWithChecks}
-                onClearQueue={clearQueue}
-              />
-            </div>
+            ) : isQueueProcessing ? (
+              /* Processing - split layout with queue list and processing panel */
+              <>
+                <div className="flex w-96 flex-shrink-0 flex-col">
+                  <BurnerQueuePanel
+                    queue={queue}
+                    stats={queueStats}
+                    isProcessing={isQueueProcessing}
+                    onAddFiles={handleAddFilesToQueue}
+                    onRemoveItem={removeItem}
+                    onOpenFolder={openItemFolder}
+                  />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <QueueProcessingPanel
+                    currentItem={getCurrentItem()}
+                    onPause={pauseQueue}
+                  />
+                </div>
+              </>
+            ) : (
+              /* Idle with items - split layout with queue list and idle panel */
+              <>
+                <div className="flex w-96 flex-shrink-0 flex-col">
+                  <BurnerQueuePanel
+                    queue={queue}
+                    stats={queueStats}
+                    isProcessing={isQueueProcessing}
+                    onAddFiles={handleAddFilesToQueue}
+                    onRemoveItem={removeItem}
+                    onOpenFolder={openItemFolder}
+                  />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <QueueIdlePanel
+                    stats={queueStats}
+                    canStart={queueStats.pending > 0 && !!ffmpegInstalled}
+                    isPaused={isQueuePaused}
+                    onStart={startQueueWithChecks}
+                    onResume={resumeQueueWithChecks}
+                    onClear={clearQueue}
+                    onAddFiles={() => setAddFilesDialogOpen(true)}
+                  />
+                </div>
+              </>
+            )}
           </TabsContent>
         </Tabs>
       </div>
@@ -341,6 +481,24 @@ function SubtitleBurnerContent() {
         onAutoRenameAll={handleConflictAutoRename}
         onOverwriteAll={handleConflictOverwrite}
         onCancel={handleConflictCancel}
+      />
+
+      {/* Add Files Dialog (for queue) */}
+      <AddFilesDialog
+        open={addFilesDialogOpen}
+        onOpenChange={setAddFilesDialogOpen}
+        onFilesAdded={handleAddFilesToQueue}
+      />
+
+      {/* Unpaired Videos Dialog (for queue drop) */}
+      <UnpairedFilesDialog
+        open={unpairedDialogOpen}
+        videos={unpairedVideos}
+        onSelectSubtitle={handleUnpairedSubtitleSelected}
+        onCancel={() => {
+          setUnpairedDialogOpen(false);
+          setUnpairedVideos([]);
+        }}
       />
     </div>
   );
