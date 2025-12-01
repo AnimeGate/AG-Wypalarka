@@ -1,8 +1,8 @@
 {
-  "name": "electron-starter-template",
-  "productName": "Electron App",
+  "name": "ag-wypalarka",
+  "productName": "AG-Wypalarka",
   "version": "0.1.0",
-  "description": "A modern Electron starter template with React 19, TypeScript, shadcn-ui, i18next, TanStack Router, and comprehensive tooling",
+  "description": "Professional video subtitle burning tool - embed ASS subtitles into video files with FFmpeg",
   "main": "dist-electron/main.js",
   "private": true,
   "packageManager": "pnpm@9.15.0",
@@ -23,15 +23,15 @@
     "test:e2e": "playwright test",
     "test:all": "vitest run && playwright test"
   },
-  "author": "Your Name <your.email@example.com>",
-  "license": "MIT",
+  "author": "Shironex <shironexplaysgames@gmail.com>",
+  "license": "UNLICENSED",
   "repository": {
     "type": "git",
-    "url": "https://github.com/yourusername/your-repo.git"
+    "url": "https://github.com/AnimeGate/AG-Wypalarka.git"
   },
   "build": {
-    "appId": "com.yourcompany.yourapp",
-    "productName": "Electron App",
+    "appId": "com.animegate.ag-wypalarka",
+    "productName": "AG-Wypalarka",
     "files": [
       "dist/**/*",
       "dist-electron/**/*",
@@ -57,12 +57,12 @@
       "allowToChangeInstallationDirectory": true,
       "createDesktopShortcut": true,
       "createStartMenuShortcut": true,
-      "shortcutName": "Electron App"
+      "shortcutName": "AG-Wypalarka"
     },
     "publish": {
       "provider": "github",
-      "owner": "yourusername",
-      "repo": "your-repo"
+      "owner": "AnimeGate",
+      "repo": "AG-Wypalarka"
     }
   },
   "devDependencies": {
@@ -76,6 +76,7 @@
     "@testing-library/user-event": "^14.6.1",
     "@types/eslint-config-prettier": "^6.11.3",
     "@types/node": "^24.7.0",
+    "@types/path-browserify": "^1.0.3",
     "@types/react": "^19.1.14",
     "@types/react-dom": "^19.1.9",
     "@vitejs/plugin-react": "^5.0.4",
@@ -119,12 +120,14 @@
     "@radix-ui/react-tabs": "^1.1.13",
     "@radix-ui/react-toggle": "^1.1.9",
     "@radix-ui/react-toggle-group": "^1.1.11",
+    "@radix-ui/react-tooltip": "^1.2.8",
     "@tailwindcss/vite": "^4.1.13",
     "@tanstack/react-query": "^5.90.2",
     "@tanstack/react-router": "^1.132.41",
     "@tanstack/react-router-devtools": "^1.132.41",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "cmdk": "^1.1.1",
     "electron-log": "^5.4.3",
     "electron-updater": "^6.6.2",
     "electron-window-state": "^5.0.3",
