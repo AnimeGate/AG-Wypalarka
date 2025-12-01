@@ -2,7 +2,7 @@
 <html>
 <head>
   <meta charset="UTF-8">
-  <title>Electron App - Debug Console</title>
+  <title>AG-Wypalarka - Debug Console</title>
   <style>
     * {
       margin: 0;
@@ -165,6 +165,26 @@
       color: #f7b731;
     }
 
+    .log-entry.ffmpeg {
+      border-left-color: #ff7b54;
+      color: #ff7b54;
+    }
+
+    .log-entry.queue {
+      border-left-color: #54d9ff;
+      color: #54d9ff;
+    }
+
+    .log-entry.file {
+      border-left-color: #79c0ff;
+      color: #79c0ff;
+    }
+
+    .log-entry.legal {
+      border-left-color: #d2a8ff;
+      color: #d2a8ff;
+    }
+
     .log-entry.highlight {
       background: rgba(88, 166, 255, 0.1);
     }
@@ -239,7 +259,7 @@
 </head>
 <body>
   <div id="header">
-    <h1>🐛 Electron App Debug Console</h1>
+    <h1>🐛 AG-Wypalarka Debug Console</h1>
     <div id="controls">
       <button id="autoScrollBtn" class="active" title="Toggle auto-scroll">📜 Auto-scroll</button>
       <button id="clearBtn">🗑️ Clear</button>
@@ -274,6 +294,18 @@
       </label>
       <label class="filter-label" style="color: #f7b731;">
         <input type="checkbox" id="filter-updater" checked> Updater
+      </label>
+      <label class="filter-label" style="color: #ff7b54;">
+        <input type="checkbox" id="filter-ffmpeg" checked> FFmpeg
+      </label>
+      <label class="filter-label" style="color: #54d9ff;">
+        <input type="checkbox" id="filter-queue" checked> Queue
+      </label>
+      <label class="filter-label" style="color: #79c0ff;">
+        <input type="checkbox" id="filter-file" checked> File
+      </label>
+      <label class="filter-label" style="color: #d2a8ff;">
+        <input type="checkbox" id="filter-legal" checked> Legal
       </label>
     </div>
   </div>
@@ -324,7 +356,11 @@
       debug: true,
       route: true,
       ipc: true,
-      updater: true
+      updater: true,
+      ffmpeg: true,
+      queue: true,
+      file: true,
+      legal: true
     };
 
     // Auto-scroll detection
@@ -360,7 +396,7 @@
     });
 
     // Level filters
-    ['info', 'success', 'warn', 'error', 'debug', 'route', 'ipc', 'updater'].forEach(level => {
+    ['info', 'success', 'warn', 'error', 'debug', 'route', 'ipc', 'updater', 'ffmpeg', 'queue', 'file', 'legal'].forEach(level => {
       const checkbox = document.getElementById(`filter-${level}`);
       checkbox.addEventListener('change', (e) => {
         levelFilters[level] = e.target.checked;
@@ -479,7 +515,11 @@
         debug: '🔍 DEBUG',
         route: '🧭 ROUTE',
         ipc: '📡 IPC',
-        updater: '🔄 UPDATER'
+        updater: '🔄 UPDATER',
+        ffmpeg: '🎬 FFMPEG',
+        queue: '📋 QUEUE',
+        file: '📁 FILE',
+        legal: '⚖️  LEGAL'
       };
       return displays[level] || level.toUpperCase();
     }

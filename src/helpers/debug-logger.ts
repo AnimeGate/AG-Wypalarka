@@ -59,4 +59,40 @@ export const debugLog = {
       window.debugAPI.updater(message, ...args);
     }
   },
+
+  /**
+   * Log FFmpeg operations
+   */
+  ffmpeg: (message: string, ...args: unknown[]) => {
+    if (window.debugAPI) {
+      window.debugAPI.ffmpeg(message, ...args);
+    }
+  },
+
+  /**
+   * Log queue operations
+   */
+  queue: (message: string, ...args: unknown[]) => {
+    if (window.debugAPI) {
+      window.debugAPI.queue(message, ...args);
+    }
+  },
+
+  /**
+   * Log file operations
+   */
+  file: (message: string, ...args: unknown[]) => {
+    if (window.debugAPI) {
+      window.debugAPI.file(message, ...args);
+    }
+  },
+
+  /**
+   * Log legal/copyright info
+   */
+  legal: (message: string, ...args: unknown[]) => {
+    if (window.debugAPI) {
+      window.debugAPI.legal(message, ...args);
+    }
+  },
 };

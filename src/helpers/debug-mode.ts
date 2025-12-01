@@ -95,6 +95,8 @@ export function createDebugConsole(): void {
   debugConsoleWindow.once("ready-to-show", () => {
     debugConsoleWindow?.show();
     debugLog.success("Debug console window opened");
+    // Log copyright notice
+    debugLog.legal("© 2025 Shironex / AnimeGATE - All rights reserved");
   });
 
   debugConsoleWindow.on("closed", () => {
@@ -179,6 +181,34 @@ export const debugLog = {
     if (isDebugMode) {
       log.info(`🔄 [UPDATER] ${message}`, ...args);
       sendToDebugConsole("updater", message, args);
+    }
+  },
+
+  ffmpeg: (message: string, ...args: unknown[]) => {
+    if (isDebugMode) {
+      log.info(`🎬 [FFMPEG] ${message}`, ...args);
+      sendToDebugConsole("ffmpeg", message, args);
+    }
+  },
+
+  queue: (message: string, ...args: unknown[]) => {
+    if (isDebugMode) {
+      log.info(`📋 [QUEUE] ${message}`, ...args);
+      sendToDebugConsole("queue", message, args);
+    }
+  },
+
+  file: (message: string, ...args: unknown[]) => {
+    if (isDebugMode) {
+      log.info(`📁 [FILE] ${message}`, ...args);
+      sendToDebugConsole("file", message, args);
+    }
+  },
+
+  legal: (message: string, ...args: unknown[]) => {
+    if (isDebugMode) {
+      log.info(`⚖️  [LEGAL] ${message}`, ...args);
+      sendToDebugConsole("legal", message, args);
     }
   },
 };

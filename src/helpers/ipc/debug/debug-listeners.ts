@@ -12,7 +12,19 @@ export function registerDebugListeners(_mainWindow: BrowserWindow): void {
     (
       _event,
       data: {
-        level: "info" | "success" | "warn" | "error" | "debug" | "route" | "ipc" | "updater";
+        level:
+          | "info"
+          | "success"
+          | "warn"
+          | "error"
+          | "debug"
+          | "route"
+          | "ipc"
+          | "updater"
+          | "ffmpeg"
+          | "queue"
+          | "file"
+          | "legal";
         message: string;
         args: unknown[];
       }
@@ -44,6 +56,18 @@ export function registerDebugListeners(_mainWindow: BrowserWindow): void {
           break;
         case "updater":
           debugLog.updater(message, ...args);
+          break;
+        case "ffmpeg":
+          debugLog.ffmpeg(message, ...args);
+          break;
+        case "queue":
+          debugLog.queue(message, ...args);
+          break;
+        case "file":
+          debugLog.file(message, ...args);
+          break;
+        case "legal":
+          debugLog.legal(message, ...args);
           break;
       }
     }

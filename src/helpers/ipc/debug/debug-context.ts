@@ -7,7 +7,19 @@ import { DEBUG_CHANNELS } from "./debug-channels";
 export function exposeDebugContext(): void {
   contextBridge.exposeInMainWorld("debugAPI", {
     log: (
-      level: "info" | "success" | "warn" | "error" | "debug" | "route" | "ipc" | "updater",
+      level:
+        | "info"
+        | "success"
+        | "warn"
+        | "error"
+        | "debug"
+        | "route"
+        | "ipc"
+        | "updater"
+        | "ffmpeg"
+        | "queue"
+        | "file"
+        | "legal",
       message: string,
       ...args: unknown[]
     ) => {
@@ -44,6 +56,22 @@ export function exposeDebugContext(): void {
 
     updater: (message: string, ...args: unknown[]) => {
       ipcRenderer.send(DEBUG_CHANNELS.LOG, { level: "updater", message, args });
+    },
+
+    ffmpeg: (message: string, ...args: unknown[]) => {
+      ipcRenderer.send(DEBUG_CHANNELS.LOG, { level: "ffmpeg", message, args });
+    },
+
+    queue: (message: string, ...args: unknown[]) => {
+      ipcRenderer.send(DEBUG_CHANNELS.LOG, { level: "queue", message, args });
+    },
+
+    file: (message: string, ...args: unknown[]) => {
+      ipcRenderer.send(DEBUG_CHANNELS.LOG, { level: "file", message, args });
+    },
+
+    legal: (message: string, ...args: unknown[]) => {
+      ipcRenderer.send(DEBUG_CHANNELS.LOG, { level: "legal", message, args });
     },
   });
 }
