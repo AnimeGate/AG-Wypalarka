@@ -166,7 +166,7 @@ export function ChangelogHistoryDialog() {
                       <RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} />
                     </Button>
                   </TooltipTrigger>
-                  <TooltipContent>
+                  <TooltipContent side="bottom">
                     <p>{t("changelogRefresh")}</p>
                   </TooltipContent>
                 </Tooltip>
