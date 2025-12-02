@@ -9,7 +9,11 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { DropZone } from "@/components/ui/drop-zone";
+import { getDroppedFilePaths } from "@/lib/drop-helpers";
 import { Film, FileText } from "lucide-react";
+
+const SUBTITLE_EXTENSIONS = [".ass", ".srt", ".sub", ".ssa", ".vtt"];
 
 interface UnpairedFilesDialogProps {
   open: boolean;
@@ -33,6 +37,13 @@ export function UnpairedFilesDialog({
     }
   };
 
+  const handleSubtitleDrop = (files: File[]) => {
+    const paths = getDroppedFilePaths(files);
+    if (paths.length > 0) {
+      onSelectSubtitle(paths[0]);
+    }
+  };
+
   // Extract just filenames for display
   const fileNames = videos.map(
     (path) => path.split(/[\\/]/).pop() || path,
@@ -41,40 +52,52 @@ export function UnpairedFilesDialog({
   return (
     <Dialog open={open} onOpenChange={(isOpen) => !isOpen && onCancel()}>
       <DialogContent className="sm:max-w-md">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <Film className="h-5 w-5" />
-            {t("burnerUnpairedTitle")}
-          </DialogTitle>
-          <DialogDescription>
-            {t("burnerUnpairedDescription", { count: videos.length })}
-          </DialogDescription>
-        </DialogHeader>
+        <DropZone
+          onDrop={handleSubtitleDrop}
+          accept={SUBTITLE_EXTENSIONS}
+          multiple={false}
+          className="flex flex-col gap-4 rounded-lg border-2 border-dashed border-transparent transition-colors"
+          activeClassName="border-primary bg-primary/5"
+        >
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Film className="h-5 w-5" />
+              {t("burnerUnpairedTitle")}
+            </DialogTitle>
+            <DialogDescription>
+              {t("burnerUnpairedDescription", { count: videos.length })}
+            </DialogDescription>
+          </DialogHeader>
 
-        <ScrollArea className="max-h-40">
-          <ul className="space-y-1 text-sm">
-            {fileNames.map((name, i) => (
-              <li
-                key={i}
-                className="text-muted-foreground flex items-center gap-2"
-                title={videos[i]}
-              >
-                <Film className="h-4 w-4 flex-shrink-0" />
-                <span className="truncate">{name}</span>
-              </li>
-            ))}
-          </ul>
-        </ScrollArea>
+          <ScrollArea className="max-h-40">
+            <ul className="space-y-1 text-sm">
+              {fileNames.map((name, i) => (
+                <li
+                  key={i}
+                  className="text-muted-foreground flex items-center gap-2"
+                  title={videos[i]}
+                >
+                  <Film className="h-4 w-4 flex-shrink-0" />
+                  <span className="truncate">{name}</span>
+                </li>
+              ))}
+            </ul>
+          </ScrollArea>
 
-        <DialogFooter className="flex-col gap-2 sm:flex-row">
-          <Button variant="outline" onClick={onCancel}>
-            {t("burnerCancel")}
-          </Button>
-          <Button onClick={handleSelectSubtitle}>
-            <FileText className="mr-2 h-4 w-4" />
-            {t("burnerUnpairedSelectSubtitle")}
-          </Button>
-        </DialogFooter>
+          <p className="text-muted-foreground text-center text-xs">
+            {t("burnerUnpairedDropHint")}
+          </p>
+
+          <DialogFooter className="flex-col gap-2 sm:flex-row">
+            <Button variant="outline" onClick={onCancel}>
+              {t("burnerCancel")}
+            </Button>
+            <Button onClick={handleSelectSubtitle}>
+              <FileText className="mr-2 h-4 w-4" />
+              {t("burnerUnpairedSelectSubtitle")}
+            </Button>
+          </DialogFooter>
+        </DropZone>
       </DialogContent>
     </Dialog>
   );

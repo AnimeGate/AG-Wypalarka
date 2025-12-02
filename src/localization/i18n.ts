@@ -118,6 +118,7 @@ i18n.use(initReactI18next).init({
         burnerUnpairedDescription:
           "Nie znaleziono napisów dla {{count}} plików wideo. Wybierz plik napisów do zastosowania dla wszystkich.",
         burnerUnpairedSelectSubtitle: "Wybierz napisy",
+        burnerUnpairedDropHint: "lub przeciągnij i upuść plik napisów tutaj",
         burnerUnpairedCancel: "Anuluj",
 
         // Output
@@ -496,6 +497,7 @@ i18n.use(initReactI18next).init({
         burnerUnpairedDescription:
           "No subtitles found for {{count}} video files. Select a subtitle file to apply to all.",
         burnerUnpairedSelectSubtitle: "Select subtitle",
+        burnerUnpairedDropHint: "or drag and drop a subtitle file here",
         burnerUnpairedCancel: "Cancel",
 
         // Output

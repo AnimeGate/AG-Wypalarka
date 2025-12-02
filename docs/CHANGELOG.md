@@ -7,6 +7,14 @@ projekt stosuje [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [1.2.2] - 2025-12-02
+
+### Dodano
+
+- Przeciągnij i upuść w oknie dialogowym niesparowanych plików - teraz można upuścić plik napisów bezpośrednio na dialog zamiast używać przycisku wyboru
+
+---
+
 ## [1.2.1] - 2025-12-01
 
 ### Poprawiono
